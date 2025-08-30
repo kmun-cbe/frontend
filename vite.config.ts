@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load env file from root directory
-  const env = loadEnv(mode, '../', '');
+  // Load env file from frontend directory
+  const env = loadEnv(mode, './', '');
   
   return {
     plugins: [react()],
@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/api': {
-          target: 'http://localhost:3001',
+          target: env.VITE_API_URL || 'https://backend-7rnp.onrender.com/api',
           changeOrigin: true,
           secure: false,
         },

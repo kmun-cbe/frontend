@@ -596,8 +596,10 @@ const DevAdminDashboard: React.FC = () => {
 
   const checkSystemStatus = async () => {
     try {
-              // Check database connection
-        const dbResponse = await fetch('/api/health/database');
+              const apiBaseUrl = import.meta.env.VITE_API_URL ;
+        
+        // Check database connection
+        const dbResponse = await fetch(`${apiBaseUrl}/health/database`);
         setSystemStatus(prev => ({
           ...prev,
           database: {
@@ -607,7 +609,7 @@ const DevAdminDashboard: React.FC = () => {
         }));
 
         // Check payment gateway
-        const paymentResponse = await fetch('/api/health/payment');
+        const paymentResponse = await fetch(`${apiBaseUrl}/health/payment`);
         setSystemStatus(prev => ({
           ...prev,
           paymentGateway: {
@@ -617,7 +619,7 @@ const DevAdminDashboard: React.FC = () => {
         }));
 
         // Check email service
-        const emailResponse = await fetch('/api/health/email');
+        const emailResponse = await fetch(`${apiBaseUrl}/health/email`);
         setSystemStatus(prev => ({
           ...prev,
           emailService: {
