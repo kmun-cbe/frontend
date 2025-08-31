@@ -46,18 +46,18 @@ export const authAPI = {
   },
 
   getProfile: async () => {
-    return authenticatedFetch('/auth/profile');
+    return authenticatedFetch('/api/auth/profile');
   },
 
   updateProfile: async (data: any) => {
-    return authenticatedFetch('/auth/profile', {
+    return authenticatedFetch('/api/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    return authenticatedFetch('/auth/change-password', {
+    return authenticatedFetch('/api/auth/change-password', {
       method: 'PUT',
       body: JSON.stringify({ currentPassword, newPassword }),
     });
@@ -67,29 +67,29 @@ export const authAPI = {
 // Registration API
 export const registrationAPI = {
   create: async (data: any) => {
-    return authenticatedFetch('/registrations', {
+    return authenticatedFetch('/api/registrations', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   getAll: async () => {
-    return authenticatedFetch('/registrations');
+    return authenticatedFetch('/api/registrations');
   },
 
   getById: async (id: string) => {
-    return authenticatedFetch(`/registrations/${id}`);
+    return authenticatedFetch(`/api/registrations/${id}`);
   },
 
   update: async (id: string, data: any) => {
-    return authenticatedFetch(`/registrations/${id}`, {
+    return authenticatedFetch(`/api/registrations/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   delete: async (id: string) => {
-    return authenticatedFetch(`/registrations/${id}`, {
+    return authenticatedFetch(`/api/registrations/${id}`, {
       method: 'DELETE',
     });
   },
@@ -98,58 +98,58 @@ export const registrationAPI = {
 // Committees API
 export const committeesAPI = {
   getAll: async () => {
-    return authenticatedFetch('/committees');
+    return authenticatedFetch('/api/committees');
   },
 
   getById: async (id: string) => {
-    return authenticatedFetch(`/committees/${id}`);
+    return authenticatedFetch(`/api/committees/${id}`);
   },
 
   create: async (data: any) => {
-    return authenticatedFetch('/committees', {
+    return authenticatedFetch('/api/committees', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   update: async (id: string, data: any) => {
-    return authenticatedFetch(`/committees/${id}`, {
+    return authenticatedFetch(`/api/committees/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   delete: async (id: string) => {
-    return authenticatedFetch(`/committees/${id}`, {
+    return authenticatedFetch(`/api/committees/${id}`, {
       method: 'DELETE',
     });
   },
 
   getStats: async () => {
-    return authenticatedFetch('/committees/stats');
+    return authenticatedFetch('/api/committees/stats');
   },
 
   // Portfolio Management
   getPortfolios: async (committeeId: string) => {
-    return authenticatedFetch(`/committees/${committeeId}/portfolios`);
+    return authenticatedFetch(`/api/committees/${committeeId}/portfolios`);
   },
 
   addPortfolio: async (committeeId: string, data: any) => {
-    return authenticatedFetch(`/committees/${committeeId}/portfolios`, {
+    return authenticatedFetch(`/api/committees/${committeeId}/portfolios`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   updatePortfolio: async (committeeId: string, portfolioId: string, data: any) => {
-    return authenticatedFetch(`/committees/${committeeId}/portfolios/${portfolioId}`, {
+    return authenticatedFetch(`/api/committees/${committeeId}/portfolios/${portfolioId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   deletePortfolio: async (committeeId: string, portfolioId: string) => {
-    return authenticatedFetch(`/committees/${committeeId}/portfolios/${portfolioId}`, {
+    return authenticatedFetch(`/api/committees/${committeeId}/portfolios/${portfolioId}`, {
       method: 'DELETE',
     });
   },
@@ -158,29 +158,29 @@ export const committeesAPI = {
 // Users API
 export const usersAPI = {
   getAll: async () => {
-    return authenticatedFetch('/users');
+    return authenticatedFetch('/api/users');
   },
 
   getById: async (id: string) => {
-    return authenticatedFetch(`/users/${id}`);
+    return authenticatedFetch(`/api/users/${id}`);
   },
 
   create: async (data: any) => {
-    return authenticatedFetch('/users', {
+    return authenticatedFetch('/api/users', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   update: async (id: string, data: any) => {
-    return authenticatedFetch(`/users/${id}`, {
+    return authenticatedFetch(`/api/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   delete: async (id: string) => {
-    return authenticatedFetch(`/users/${id}`, {
+    return authenticatedFetch(`/api/users/${id}`, {
       method: 'DELETE',
     });
   },
@@ -189,11 +189,11 @@ export const usersAPI = {
 // Pricing API
 export const pricingAPI = {
   get: async () => {
-    return authenticatedFetch('/pricing');
+    return authenticatedFetch('/api/pricing');
   },
 
   update: async (data: any) => {
-    return authenticatedFetch('/pricing', {
+    return authenticatedFetch('/api/pricing', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -203,22 +203,22 @@ export const pricingAPI = {
 // Payments API
 export const paymentsAPI = {
   getAll: async () => {
-    return authenticatedFetch('/payments');
+    return authenticatedFetch('/api/payments');
   },
 
   getById: async (id: string) => {
-    return authenticatedFetch(`/payments/${id}`);
+    return authenticatedFetch(`/api/payments/${id}`);
   },
 
   create: async (data: any) => {
-    return authenticatedFetch('/payments', {
+    return authenticatedFetch('/api/payments', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   update: async (id: string, data: any) => {
-    return authenticatedFetch(`/payments/${id}`, {
+    return authenticatedFetch(`/api/payments/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -228,11 +228,11 @@ export const paymentsAPI = {
 // Dashboard Stats API
 export const dashboardAPI = {
   getStats: async () => {
-    return authenticatedFetch('/dashboard/stats');
+    return authenticatedFetch('/api/dashboard/stats');
   },
 
   getRecentActivity: async () => {
-    return authenticatedFetch('/dashboard/activity');
+    return authenticatedFetch('/api/dashboard/activity');
   },
 };
 
@@ -286,19 +286,19 @@ export const contactAPI = {
 // Popup API
 export const popupAPI = {
   get: async () => {
-    return authenticatedFetch('/popups');
+    return authenticatedFetch('/api/popups');
   },
   getActive: async () => {
-    return fetch(`${API_BASE_URL}/popups/active`);
+    return fetch(`${API_BASE_URL}/api/popups/active`);
   },
   update: async (data: any) => {
-    return authenticatedFetch('/popups', {
+    return authenticatedFetch('/api/popups', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
   toggle: async (isActive: boolean) => {
-    return authenticatedFetch('/popups/toggle', {
+    return authenticatedFetch('/api/popups/toggle', {
       method: 'PATCH',
       body: JSON.stringify({ isActive }),
     });
