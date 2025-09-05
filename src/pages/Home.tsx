@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { pricingAPI, committeesAPI } from '../services/api';
 import Popup from '../components/Common/Popup';
+import { getImageUrl } from '../utils/images';
 
 interface Pricing {
   internalDelegate: number;
@@ -96,7 +97,7 @@ const Home: React.FC = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src="/dome 2.png" 
+            src={getImageUrl('dome', '/dome-2.png')} 
             alt="Temple Dome" 
             className="absolute right-[-10%] top-0 h-full object-cover"
             onError={(e) => {

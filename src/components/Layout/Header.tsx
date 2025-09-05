@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getImageUrl } from '../../utils/images';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,7 +34,7 @@ const Header: React.FC = () => {
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
               <img
-                src="/logo.png"
+                src={getImageUrl('logo', '/logo.png')}
                 alt="K-MUN 2025 Logo"
                 className="w-full h-full object-contain"
                 onError={(e) => {
