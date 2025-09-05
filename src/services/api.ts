@@ -1,5 +1,5 @@
 // API service for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -66,11 +66,21 @@ export const authAPI = {
 
 // Registration API
 export const registrationAPI = {
-  create: async (data: any) => {
-    return authenticatedFetch('/api/registrations', {
+  create: async (data: FormData) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/registrations`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: data,
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   },
 
   getAll: async () => {
@@ -206,24 +216,75 @@ export const pricingAPI = {
 
 // Payments API
 export const paymentsAPI = {
-  getAll: async () => {
-    return authenticatedFetch('/api/payments');
+  createOrder: async (data: {
+    userId: string;
+    registrationId?: string;
+    amount: number;
+    currency?: string;
+  }) => {
+    return authenticatedFetch('/api/payments/create-order', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  verifyPayment: async (data: {
+    paymentId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) => {
+    return authenticatedFetch('/api/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getAll: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    userId?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.userId) queryParams.append('userId', params.userId);
+    
+    const url = `/api/payments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return authenticatedFetch(url);
   },
 
   getById: async (id: string) => {
     return authenticatedFetch(`/api/payments/${id}`);
   },
 
-  create: async (data: any) => {
-    return authenticatedFetch('/api/payments', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  getStats: async () => {
+    return authenticatedFetch('/api/payments/stats');
   },
 
-  update: async (id: string, data: any) => {
-    return authenticatedFetch(`/api/payments/${id}`, {
-      method: 'PUT',
+  getTransactionLogs: async (params?: {
+    page?: number;
+    limit?: number;
+    action?: string;
+    userId?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.action) queryParams.append('action', params.action);
+    if (params?.userId) queryParams.append('userId', params.userId);
+    
+    const url = `/api/payments/logs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return authenticatedFetch(url);
+  },
+
+  refund: async (paymentId: string, data: {
+    amount: number;
+    reason: string;
+  }) => {
+    return authenticatedFetch(`/api/payments/${paymentId}/refund`, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   },
@@ -305,6 +366,43 @@ export const popupAPI = {
     return authenticatedFetch('/api/popups/toggle', {
       method: 'PATCH',
       body: JSON.stringify({ isActive }),
+    });
+  },
+};
+
+// Mailer API
+export const mailerAPI = {
+  sendBulkEmail: async (data: {
+    recipientType: 'registrants' | 'single';
+    recipients?: string[];
+    singleEmail?: string;
+    emailProvider: 'gmail' | 'outlook';
+    subject: string;
+    message: string;
+  }) => {
+    return authenticatedFetch('/api/mailer/send', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getRecipients: async (committee?: string) => {
+    const url = committee ? `/api/mailer/recipients?committee=${committee}` : '/api/mailer/recipients';
+    return authenticatedFetch(url);
+  },
+
+  getStats: async () => {
+    return authenticatedFetch('/api/mailer/stats');
+  },
+
+  sendTestEmail: async (data: {
+    email: string;
+    subject: string;
+    message: string;
+  }) => {
+    return authenticatedFetch('/api/mailer/test', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 };

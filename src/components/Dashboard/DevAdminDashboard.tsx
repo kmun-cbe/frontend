@@ -21,9 +21,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { dashboardAPI, pricingAPI, popupAPI, committeesAPI } from '../../services/api';
+import { dashboardAPI, pricingAPI, popupAPI, committeesAPI, registrationAPI, mailerAPI } from '../../services/api';
 import ContactFormsManager from './ContactFormsManager';
+import Mailer from '../Common/Mailer';
+import TransactionRecords from './TransactionRecords';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../utils/images';
 
 interface DashboardStats {
   label: string;
@@ -45,9 +48,6 @@ interface PricingData {
   id: string;
   internalDelegate: number;
   externalDelegate: number;
-  accommodationCharge: number;
-  earlyBirdDiscount: number;
-  groupDiscount: number;
   updatedAt: string;
 }
 
@@ -67,10 +67,7 @@ const PricingManagement: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     internalDelegate: 2500,
-    externalDelegate: 3500,
-    accommodationCharge: 1500,
-    earlyBirdDiscount: 500,
-    groupDiscount: 200
+    externalDelegate: 3500
   });
 
   useEffect(() => {
@@ -85,10 +82,7 @@ const PricingManagement: React.FC = () => {
         setPricing(response.data);
         setFormData({
           internalDelegate: response.data.internalDelegate,
-          externalDelegate: response.data.externalDelegate,
-          accommodationCharge: response.data.accommodationCharge,
-          earlyBirdDiscount: response.data.earlyBirdDiscount,
-          groupDiscount: response.data.groupDiscount
+          externalDelegate: response.data.externalDelegate
         });
       }
     } catch (error) {
@@ -183,11 +177,11 @@ const PricingManagement: React.FC = () => {
         </div>
 
         {/* Pricing Form */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Internal Delegate */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+          {/* Kumaraguru Delegate */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Internal Delegate Fee
+              Kumaraguru Delegate Fee
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
@@ -221,74 +215,17 @@ const PricingManagement: React.FC = () => {
             </div>
             <p className="text-xs text-gray-500">Fee for external students</p>
           </div>
-
-          {/* Accommodation Charge */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Accommodation Charge
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-              <input
-                type="number"
-                value={formData.accommodationCharge}
-                onChange={(e) => handleInputChange('accommodationCharge', e.target.value)}
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
-                placeholder="1500"
-                min="0"
-              />
-            </div>
-            <p className="text-xs text-gray-500">Optional accommodation fee</p>
-          </div>
-
-          {/* Early Bird Discount */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Early Bird Discount
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-              <input
-                type="number"
-                value={formData.earlyBirdDiscount}
-                onChange={(e) => handleInputChange('earlyBirdDiscount', e.target.value)}
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
-                placeholder="500"
-                min="0"
-              />
-            </div>
-            <p className="text-xs text-gray-500">Discount for early registration</p>
-          </div>
-
-          {/* Group Discount */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Group Discount
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-              <input
-                type="number"
-                value={formData.groupDiscount}
-                onChange={(e) => handleInputChange('groupDiscount', e.target.value)}
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
-                placeholder="200"
-                min="0"
-              />
-            </div>
-            <p className="text-xs text-gray-500">Discount per person in group</p>
-          </div>
         </div>
       </div>
 
       {/* Pricing Summary */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Pricing Summary</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Internal Delegate</p>
+                <p className="text-sm text-gray-600">Kumaraguru Delegate</p>
                 <p className="text-xl font-bold text-[#172d9d]">₹{formData.internalDelegate}</p>
               </div>
               <Users className="w-8 h-8 text-[#172d9d] opacity-50" />
@@ -301,24 +238,6 @@ const PricingManagement: React.FC = () => {
                 <p className="text-xl font-bold text-green-600">₹{formData.externalDelegate}</p>
               </div>
               <UserPlus className="w-8 h-8 text-green-600 opacity-50" />
-            </div>
-          </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Accommodation</p>
-                <p className="text-xl font-bold text-purple-600">₹{formData.accommodationCharge}</p>
-              </div>
-              <Calendar className="w-8 h-8 text-purple-600 opacity-50" />
-            </div>
-          </div>
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Discounts</p>
-                <p className="text-xl font-bold text-yellow-600">₹{formData.earlyBirdDiscount + formData.groupDiscount}</p>
-              </div>
-              <CreditCard className="w-8 h-8 text-yellow-600 opacity-50" />
             </div>
           </div>
         </div>
@@ -574,6 +493,131 @@ const PopupManagement: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Registrations Management Component
+const RegistrationsManagement: React.FC = () => {
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRegistrations();
+  }, []);
+
+  const fetchRegistrations = async () => {
+    try {
+      setLoading(true);
+      const response = await registrationAPI.getAll();
+      if (response.success) {
+        setRegistrations(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      toast.error('Failed to load registrations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#172d9d] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading registrations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">Registration Forms</h2>
+          <button
+            onClick={fetchRegistrations}
+            className="bg-[#172d9d] text-white px-4 py-2 rounded-lg hover:bg-[#0f1a4a] transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+
+        {registrations.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No registrations found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Institution
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Accommodation
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Submitted
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {registrations.map((registration) => (
+                  <tr key={registration.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {registration.firstName} {registration.lastName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{registration.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{registration.institution || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        registration.requiresAccommodation 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {registration.requiresAccommodation ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        registration.status === 'PENDING' 
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : registration.status === 'APPROVED'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {registration.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(registration.submittedAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -964,7 +1008,53 @@ const DevAdminDashboard: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        toast.error('Failed to load dashboard data');
+        // Set default stats if API fails
+        setStats([
+          {
+            label: 'Total Users',
+            value: '0',
+            change: '0%',
+            icon: 'Users',
+            color: 'blue'
+          },
+          {
+            label: 'Total Registrations',
+            value: '0',
+            change: '0%',
+            icon: 'UserPlus',
+            color: 'green'
+          },
+          {
+            label: 'Confirmed Payments',
+            value: '0',
+            change: '0%',
+            icon: 'CreditCard',
+            color: 'purple'
+          },
+          {
+            label: 'Active Committees',
+            value: '0',
+            change: '0%',
+            icon: 'FileText',
+            color: 'yellow'
+          },
+          {
+            label: 'Contact Submissions',
+            value: '0',
+            change: '0%',
+            icon: 'MessageSquare',
+            color: 'indigo'
+          },
+          {
+            label: 'Pending Contacts',
+            value: '0',
+            change: '0%',
+            icon: 'Clock',
+            color: 'orange'
+          }
+        ]);
+        setRecentActivity([]);
+        toast.error('Dashboard data unavailable - showing default values');
       } finally {
         setLoading(false);
       }
@@ -996,6 +1086,7 @@ const DevAdminDashboard: React.FC = () => {
     { id: 'pricing', label: 'Pricing', icon: Settings },
     { id: 'popups', label: 'Popup Manager', icon: AlertCircle },
     { id: 'mailer', label: 'Mailer', icon: Mail },
+    { id: 'transactions', label: 'Transaction Records', icon: CreditCard },
     { id: 'events', label: 'Attendance Events', icon: Calendar },
     { id: 'attendance', label: 'Attendance', icon: UserCheck },
     { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
@@ -1031,8 +1122,8 @@ const DevAdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#172d9d] to-[#797dfa] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">DEV</span>
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
+                <img src={getImageUrl('logo', '/logo.png')} alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Dev Admin Dashboard</h1>
@@ -1040,10 +1131,6 @@ const DevAdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="bg-[#172d9d] text-white px-4 py-2 rounded-lg hover:bg-[#0f1a4a] transition-colors flex items-center">
-                <Plus className="w-4 h-4 mr-2" />
-                Quick Action
-              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -1275,13 +1362,54 @@ const DevAdminDashboard: React.FC = () => {
               <CommitteeManagement />
             )}
 
+            {/* Registrations Management Tab */}
+            {activeTab === 'registrations' && (
+              <RegistrationsManagement />
+            )}
+
             {/* Contact Forms Tab */}
             {activeTab === 'contact' && (
               <ContactFormsManager />
             )}
 
+            {/* Mailer Tab */}
+            {activeTab === 'mailer' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <Mailer 
+                  committees={[
+                    { id: 'all', name: 'All Registrants' },
+                    { id: 'unsc', name: 'UNSC Applicants' },
+                    { id: 'unodc', name: 'UNODC Applicants' },
+                    { id: 'lok_sabha', name: 'Lok Sabha Applicants' },
+                    { id: 'ccc', name: 'CCC Applicants' },
+                    { id: 'ipc', name: 'IPC Applicants' },
+                    { id: 'disec', name: 'DISEC Applicants' }
+                  ]}
+                  onSend={async (emailData) => {
+                    try {
+                      const result = await mailerAPI.sendBulkEmail(emailData);
+                      if (!result.success) {
+                        throw new Error(result.message || 'Failed to send email');
+                      }
+                      toast.success(`Email sent successfully to ${result.data.totalSent} recipients!`);
+                    } catch (error) {
+                      console.error('Error sending email:', error);
+                      throw error;
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Transaction Records Tab */}
+            {activeTab === 'transactions' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <TransactionRecords />
+              </div>
+            )}
+
             {/* Other tabs content would be implemented here */}
-            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'contact' && (
+            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'registrations' && activeTab !== 'contact' && activeTab !== 'mailer' && activeTab !== 'transactions' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}

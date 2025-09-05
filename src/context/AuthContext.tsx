@@ -98,7 +98,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(data.user);
         localStorage.setItem('munToken', data.token);
         localStorage.setItem('munUser', JSON.stringify(data.user));
-        toast.success('Login successful!', { id: loadingToast });
+        toast.success('Login successful! Redirecting to dashboard...', { 
+          id: loadingToast,
+          duration: 3000 
+        });
       } else {
         toast.error(data.message || 'Login failed', { id: loadingToast });
         throw new Error(data.message || 'Login failed');

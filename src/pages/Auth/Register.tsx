@@ -52,6 +52,7 @@ interface RegistrationForm {
   stateOfInstitution?: string;
   grade?: string;
   totalMuns: string;
+  requiresAccommodation: string;
   committeePreference1: string;
   portfolioPreference1: string;
   committeePreference2: string;
@@ -152,25 +153,46 @@ const Register: React.FC = () => {
     const loadingToast = toast.loading('Submitting registration...');
     setLoading(true);
     
-    console.log('Registration Data:', data);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Generate user ID
-    const userId = `KMUN25${String(Math.floor(Math.random() * 900) + 100)}`;
-    
-    toast.success('Registration submitted successfully!', { id: loadingToast });
-    setSubmitted(true);
-    setLoading(false);
-    
-    // Navigate to success page or login
-    setTimeout(() => {
-      toast.success(`Your User ID is ${userId}. Please save it for future reference.`, {
-        duration: 8000,
+    try {
+      console.log('Registration Data:', data);
+      
+      // Create FormData for file uploads
+      const formData = new FormData();
+      
+      // Add all form fields
+      Object.keys(data).forEach(key => {
+        if (key === 'idDocument' && data.idDocument && data.idDocument[0]) {
+          formData.append('idDocument', data.idDocument[0]);
+        } else if (key === 'munResume' && data.munResume && data.munResume[0]) {
+          formData.append('munResume', data.munResume[0]);
+        } else if (key !== 'terms' && key !== 'idDocument' && key !== 'munResume') {
+          formData.append(key, data[key as keyof RegistrationForm] as string);
+        }
       });
-      navigate('/login');
-    }, 3000);
+      
+      // Call the registration API
+      const response = await registrationAPI.create(formData);
+      
+      if (response.success) {
+        toast.success('Registration submitted successfully!', { id: loadingToast });
+        setSubmitted(true);
+        setLoading(false);
+        
+        // Show user credentials after a delay
+        setTimeout(() => {
+          toast.success(`Registration ID: ${response.registration.id}. Check your email for login credentials.`, {
+            duration: 8000,
+          });
+          navigate('/login');
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.', { id: loadingToast });
+      setLoading(false);
+    }
   };
 
   const nextStep = async () => {
@@ -557,6 +579,24 @@ const Register: React.FC = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.totalMuns.message}</p>
                   )}
                 </div>
+
+                {/* Accommodation Requirement */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Do you require accommodation? <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    {...register('requiresAccommodation', { required: 'Please select accommodation requirement' })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                  {errors.requiresAccommodation && (
+                    <p className="mt-1 text-sm text-red-600">{errors.requiresAccommodation.message}</p>
+                  )}
+                </div>
               </motion.div>
             )}
 
@@ -722,7 +762,7 @@ const Register: React.FC = () => {
                     <h4 className="text-lg font-semibold text-blue-900 mb-4">Registration Fees</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-white p-4 rounded-lg border border-blue-200">
-                        <h5 className="font-medium text-blue-900 mb-2">Internal Delegate</h5>
+                        <h5 className="font-medium text-blue-900 mb-2">Kumaraguru Delegate</h5>
                         <p className="text-2xl font-bold text-blue-600">₹{pricing.internalDelegate}</p>
                         <p className="text-sm text-gray-600">Kumaraguru students</p>
                       </div>
@@ -756,7 +796,7 @@ const Register: React.FC = () => {
                     <div className="text-sm text-blue-800">
                       <p className="font-medium mb-1">Important Notes:</p>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Registration fee: ₹{pricing?.internalDelegate || 2500} (Internal) / ₹{pricing?.externalDelegate || 3500} (External)</li>
+                        <li>Registration fee: ₹{pricing?.internalDelegate || 2500} (Kumaraguru) / ₹{pricing?.externalDelegate || 3500} (External)</li>
                         <li>Payment must be completed within 48 hours of registration</li>
                         <li>Committee allocation will be based on preferences and availability</li>
                         <li>All documents will be verified before final confirmation</li>
@@ -793,6 +833,26 @@ const Register: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Payment Amount Info Block */}
+            {step === 3 && pricing && (
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-6 mb-6">
+                <div className="flex items-center justify-center">
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-emerald-900 mb-2">Payment Summary</h4>
+                    <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                      <p className="text-sm text-gray-600 mb-1">Amount to be paid:</p>
+                      <p className="text-3xl font-bold text-emerald-600">
+                        ₹{isKumaraguru === 'yes' ? pricing.internalDelegate : pricing.externalDelegate}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {isKumaraguru === 'yes' ? 'Kumaraguru Delegate Fee' : 'External Delegate Fee'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between mt-8">
               {step > 1 && (
                 <button
@@ -826,7 +886,7 @@ const Register: React.FC = () => {
                       <span className="ml-2">Submitting...</span>
                     </div>
                   ) : (
-                    'Submit Registration'
+                    'Submit and Pay'
                   )}
                 </button>
               )}

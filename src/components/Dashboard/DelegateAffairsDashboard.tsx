@@ -12,6 +12,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ContactFormsManager from './ContactFormsManager';
+import Mailer from '../Common/Mailer';
+import toast from 'react-hot-toast';
+import { mailerAPI } from '../../services/api';
 
 const DelegateAffairsDashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -241,8 +244,37 @@ const DelegateAffairsDashboard: React.FC = () => {
               <ContactFormsManager />
             )}
 
+            {/* Mailer Tab */}
+            {activeTab === 'mailer' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <Mailer 
+                  committees={[
+                    { id: 'all', name: 'All Registrants' },
+                    { id: 'unsc', name: 'UNSC Applicants' },
+                    { id: 'unodc', name: 'UNODC Applicants' },
+                    { id: 'lok_sabha', name: 'Lok Sabha Applicants' },
+                    { id: 'ccc', name: 'CCC Applicants' },
+                    { id: 'ipc', name: 'IPC Applicants' },
+                    { id: 'disec', name: 'DISEC Applicants' }
+                  ]}
+                  onSend={async (emailData) => {
+                    try {
+                      const result = await mailerAPI.sendBulkEmail(emailData);
+                      if (!result.success) {
+                        throw new Error(result.message || 'Failed to send email');
+                      }
+                      toast.success(`Email sent successfully to ${result.data.totalSent} recipients!`);
+                    } catch (error) {
+                      console.error('Error sending email:', error);
+                      throw error;
+                    }
+                  }}
+                />
+              </div>
+            )}
+
             {/* Other tabs */}
-            {activeTab !== 'registrations' && activeTab !== 'allocation' && activeTab !== 'contact' && (
+            {activeTab !== 'registrations' && activeTab !== 'allocation' && activeTab !== 'contact' && activeTab !== 'mailer' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}

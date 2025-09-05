@@ -7,9 +7,7 @@ import {
   BookOpen,
   Users,
   Heart,
-  MessageSquare,
-  Calendar,
-  MapPin
+  MessageSquare
 } from 'lucide-react';
 import { pricingAPI, committeesAPI } from '../services/api';
 import Popup from '../components/Common/Popup';
@@ -18,9 +16,6 @@ import { getImageUrl } from '../utils/images';
 interface Pricing {
   internalDelegate: number;
   externalDelegate: number;
-  accommodationCharge: number;
-  earlyBirdDiscount: number;
-  groupDiscount: number;
 }
 
 interface Committee {
@@ -37,10 +32,7 @@ interface Committee {
 const Home: React.FC = () => {
   const [pricing, setPricing] = useState<Pricing>({
     internalDelegate: 2500,
-    externalDelegate: 3500,
-    accommodationCharge: 1500,
-    earlyBirdDiscount: 500,
-    groupDiscount: 200
+    externalDelegate: 3500
   });
   const [featuredCommittees, setFeaturedCommittees] = useState<Committee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +63,7 @@ const Home: React.FC = () => {
   }, []);
 
   const whyKmunFeatures = [
-    { icon: Lightbulb, label: 'SKILLS REQUIRED' },
+    { icon: Lightbulb, label: 'SKILLS ACQUIRED' },
     { icon: BookOpen, label: 'LEADERSHIP TRAINING' },
     { icon: Users, label: 'CREATIVE SKILLS' },
     { icon: Heart, label: 'BUILDING RELATIONSHIPS' },
@@ -173,6 +165,147 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
         </div>
       </section>
 
+      {/* About Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              ABOUT KMUN 2025
+            </h2>
+            <p className="text-lg max-w-4xl mx-auto leading-relaxed">
+            Kumaraguru Model United Nations 2025 is one of South India's premier MUN conferences, hosted by Kumaraguru Institutions. Bringing together delegates from across the globe, the conference provides a distinguished platform to simulate the workings of the United Nations. Through structured debates, negotiations, and resolution drafting, KMUN fosters diplomatic skill, critical thinking, and cross-cultural understanding. Beyond discourse, it encourages collaboration and leadership, enabling students to engage with pressing global issues while building lasting international connections. KMUN 2025 aspires to inspire young minds to become thoughtful, responsible, and impactful global citizens.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why Kumaraguru MUN */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-[#172d9d] mb-6">
+              WHY KUMARAGURU MUN
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+            {whyKmunFeatures.map((feature, index) => (
+              <motion.div
+                key={feature.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center bg-[#37c9ee]/10 p-6 rounded-lg"
+              >
+                <div className="w-16 h-16 bg-[#37c9ee] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-sm font-bold text-[#172d9d]">
+                  {feature.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Letter from Secretariat */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-[#172d9d] mb-6">
+              LETTER FROM SECRETARIAT
+            </h2>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              {/* Left Column - Letter Content */}
+              <div className="p-8 lg:p-12">
+                <div className="mb-8">
+                  
+                  <div className="text-gray-700 leading-relaxed space-y-4">
+                    <p>
+                    Dear Delegates,
+                    </p>
+                    <p>
+                    It gives us immense pleasure to welcome you to this year’s edition of Kumaraguru Model United Nations. As the Secretariat, we are committed to ensuring that every delegate experiences the true essence of Model United Nations — diplomacy, dialogue, and the spirit of international cooperation.
+
+                    </p>
+                    <p>
+                    This conference is not only an opportunity to debate and deliberate but also a platform to broaden your perspective, develop your research, and refine your skills in negotiation and leadership. Each committee has been designed to challenge you to think critically, articulate your stance, and most importantly, to listen and learn from diverse viewpoints.
+
+                    </p>
+                    <p>
+                    We strongly encourage you to actively engage with the background guides provided, conduct independent research, and come prepared with innovative ideas and thoughtful contributions. Remember, MUN is not solely about resolutions or outcomes — it is about the process of collaboration, understanding global issues, and embracing the values of respect and inclusivity.
+
+                    </p>
+                    <p>On behalf of the entire Secretariat, we extend our warmest wishes to you for a fruitful, inspiring, and memorable conference. We look forward to witnessing your enthusiasm and dedication as you step into the shoes of global leaders.
+Happy MUNning!
+</p>
+                  </div>
+                  
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Sincerely,</span><br />
+                      <span className="font-bold text-[#172d9d]">Kumaraguru MUN 2025 Secretariat</span><br />
+                      
+                      
+                      
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Column - Secretary-General Photo */}
+              <div className="bg-gray-50 flex items-center justify-center p-8 lg:p-12">
+                <div className="relative">
+                  <img 
+                    src="/pic1.jpg" 
+                    alt="Secretariat pic" 
+                    className="w-full max-w-sm h-auto rounded-lg shadow-lg object-cover"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling.style.display = 'block';
+                    }}
+                  />
+                  <div 
+                    className="hidden w-full max-w-sm h-96 bg-gradient-to-br from-[#172d9d] to-[#37c9ee] rounded-lg shadow-lg flex items-center justify-center"
+                  >
+                    <div className="text-center text-white">
+                      <div className="text-6xl mb-4">👤</div>
+                      <p className="text-lg font-semibold">Secretariat pic</p>
+                      <p className="text-sm opacity-80"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Featured Committees */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -222,60 +355,6 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              ABOUT KMUN 2025
-            </h2>
-            <p className="text-lg max-w-4xl mx-auto leading-relaxed">
-            Kumaraguru Model United Nations 2025 is one of South India’s premier MUN conferences, hosted by Kumaraguru Institutions. Bringing together delegates from across the globe, the conference provides a distinguished platform to simulate the workings of the United Nations. Through structured debates, negotiations, and resolution drafting, KMUN fosters diplomatic skill, critical thinking, and cross-cultural understanding. Beyond discourse, it encourages collaboration and leadership, enabling students to engage with pressing global issues while building lasting international connections. KMUN 2025 aspires to inspire young minds to become thoughtful, responsible, and impactful global citizens.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Why Kumaraguru MUN */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#172d9d] mb-6">
-              WHY KUMARAGURU MUN
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-            {whyKmunFeatures.map((feature, index) => (
-              <motion.div
-                key={feature.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center bg-[#37c9ee]/10 p-6 rounded-lg"
-              >
-                <div className="w-16 h-16 bg-[#37c9ee] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-sm font-bold text-[#172d9d]">
-                  {feature.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -293,14 +372,14 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="bg-white border-2 border-[#37c9ee] rounded-lg p-8 text-center"
             >
-              <h3 className="text-2xl font-bold text-[#172d9d] mb-4">Internal Delegate</h3>
+              <h3 className="text-2xl font-bold text-[#172d9d] mb-4">Kumaraguru Delegate</h3>
               <div className="text-4xl font-bold text-[#37c9ee] mb-6">
                 ₹{pricing.internalDelegate}
               </div>
@@ -325,7 +404,7 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
               className="bg-white border-2 border-[#37c9ee] rounded-lg p-8 text-center"
             >
               <h3 className="text-2xl font-bold text-[#172d9d] mb-4">External Delegate</h3>
-              <div className="text-4xl font-bold text-[#172d9d] mb-6">
+              <div className="text-4xl font-bold text-[#37c9ee] mb-6">
                 ₹{pricing.externalDelegate}
               </div>
               <ul className="text-gray-600 mb-8 space-y-2">
@@ -333,37 +412,13 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
                 <li>Delegate Kit</li>
                 <li>Certificate</li>
                 <li>Networking Events</li>
-                <li>International Experience</li>
-              </ul>
-              <Link
-                to="/register"
-                className="inline-block bg-[#172d9d] text-white px-6 py-3 rounded-lg hover:bg-[#0f1a4a] transition-colors"
-              >
-                Register Now
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white border-2 border-[#37c9ee] rounded-lg p-8 text-center"
-            >
-              <h3 className="text-2xl font-bold text-[#172d9d] mb-4">Accommodation</h3>
-              <div className="text-4xl font-bold text-[#37c9ee] mb-6">
-                ₹{pricing.accommodationCharge}
-              </div>
-              <ul className="text-gray-600 mb-8 space-y-2">
-                <li>3 Nights Stay</li>
-                <li>Breakfast & Dinner</li>
-                <li>Transportation</li>
-                <li>24/7 Support</li>
+                
               </ul>
               <Link
                 to="/register"
                 className="inline-block bg-[#37c9ee] text-white px-6 py-3 rounded-lg hover:bg-[#1ba1c4] transition-colors"
               >
-                Add Accommodation
+                Register Now
               </Link>
             </motion.div>
           </div>

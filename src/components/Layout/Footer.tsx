@@ -91,13 +91,13 @@ const Footer: React.FC = () => {
 
           {/* Event Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Campus Location</h3>
+            <h3 className="text-lg font-semibold mb-4">Address</h3>
             <ul className="space-y-2 text-gray-300">
-              <li>September 27-29, 2025</li>
               <li>Kumaraguru College of Technology</li>
+              <li>Athipalayam Road,</li>
               <li>Chinnavedampatti, Coimbatore</li>
               <li>Tamil Nadu - 641049</li>
-              <li><a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Map Link</a></li>
+              <li><a href="https://maps.app.goo.gl/J8zMQH4HSA64A1JH9" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Map Link</a></li>
             </ul>
           </div>
         </div>

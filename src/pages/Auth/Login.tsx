@@ -23,12 +23,14 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      toast.success('Login successful!');
-      navigate('/dashboard');
+      // Add a brief delay to ensure the success toast is visible during navigation
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     } catch {
       const errorMessage = 'Invalid credentials';
       setError(errorMessage);
-      toast.error(errorMessage);
+      // Error toast is already handled in AuthContext
     } finally {
       setLoading(false);
     }
