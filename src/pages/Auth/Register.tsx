@@ -81,20 +81,14 @@ const Register: React.FC = () => {
   } = useForm<RegistrationForm>();
 
   const isKumaraguru = watch('isKumaraguru');
+  const institutionType = watch('institutionType');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [committeesResponse, pricingResponse] = await Promise.all([
-          committeesAPI.getAll(),
+        const [pricingResponse] = await Promise.all([
           pricingAPI.get()
         ]);
-
-        if (committeesResponse.success) {
-          setCommittees(committeesResponse.data);
-        } else {
-          toast.error('Failed to load committees');
-        }
 
         if (pricingResponse.success) {
           setPricing(pricingResponse.data);
@@ -102,13 +96,51 @@ const Register: React.FC = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load data');
-      } finally {
-        setCommitteesLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  // Fetch committees when institution type changes
+  useEffect(() => {
+    const fetchCommittees = async () => {
+      if (isKumaraguru === 'no' && institutionType) {
+        try {
+          setCommitteesLoading(true);
+          const response = await committeesAPI.getByInstitutionType(institutionType);
+          if (response.success) {
+            setCommittees(response.data);
+          } else {
+            toast.error('Failed to load committees');
+          }
+        } catch (error) {
+          console.error('Error fetching committees:', error);
+          toast.error('Failed to load committees');
+        } finally {
+          setCommitteesLoading(false);
+        }
+      } else if (isKumaraguru === 'yes') {
+        // For Kumaraguru students, fetch all committees
+        try {
+          setCommitteesLoading(true);
+          const response = await committeesAPI.getAll();
+          if (response.success) {
+            setCommittees(response.data);
+          } else {
+            toast.error('Failed to load committees');
+          }
+        } catch (error) {
+          console.error('Error fetching committees:', error);
+          toast.error('Failed to load committees');
+        } finally {
+          setCommitteesLoading(false);
+        }
+      }
+    };
+
+    fetchCommittees();
+  }, [isKumaraguru, institutionType]);
 
   const getPortfoliosForCommittee = (committeeName: string) => {
     const committee = committees.find(c => c.name === committeeName);
@@ -421,7 +453,6 @@ const Register: React.FC = () => {
                         <option value="">Select institution type</option>
                         <option value="school">School</option>
                         <option value="college">College</option>
-                        <option value="company">Company</option>
                       </select>
                       {errors.institutionType && (
                         <p className="mt-1 text-sm text-red-600">{errors.institutionType.message}</p>
@@ -512,17 +543,16 @@ const Register: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Total number of MUNs attended <span className="text-red-600">*</span>
                   </label>
-                  <select
-                    {...register('totalMuns', { required: 'This field is required' })}
+                  <input
+                    type="number"
+                    min="0"
+                    {...register('totalMuns', { 
+                      required: 'This field is required',
+                      min: { value: 0, message: 'Number of MUNs cannot be negative' }
+                    })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select number of MUNs</option>
-                    <option value="0">0 (First time)</option>
-                    <option value="1-2">1-2</option>
-                    <option value="3-5">3-5</option>
-                    <option value="6-10">6-10</option>
-                    <option value="10+">10+</option>
-                  </select>
+                    placeholder="Enter number of MUNs attended"
+                  />
                   {errors.totalMuns && (
                     <p className="mt-1 text-sm text-red-600">{errors.totalMuns.message}</p>
                   )}

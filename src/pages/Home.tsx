@@ -120,11 +120,20 @@ const Home: React.FC = () => {
               </h1>
               
               <p className="text-2xl md:text-3xl font-bold mb-8 text-[#37c9ee]">
-                26, 27 & 28 SEPTEMBER
+                26, 27 & 28 SEPTEMBER 2025
+                
+
               </p>
               
               <p className="text-base md:text-lg mb-8 leading-relaxed text-gray-200 max-w-lg">
-                KMUN is the flagship event of the Kumaraguru Model United Nations Society, designed to connect student leaders from institutions across India. Each year, it brings together 300+ young minds to explore innovative solutions for pressing global challenges through dialogue and debate. The first edition in 2023 began as an intra-institutional conference, expanding in 2024 to welcome participants from schools and colleges. Now in its third edition, KMUN 2025 promises an even more enriching and dynamic MUN experience. This year, we aim to elevate discussions while broadening our reach nationwide, strengthening the impact and presence of our society.
+                Kumaraguru Model United Nations (KMUN) 2025
+The flagship conference of the Kumaraguru Model United Nations Society, KMUN is a platform where young leaders and changemakers converge to debate, deliberate, and design solutions for today’s most pressing global challenges.
+
+What began in 2023 as a campus initiative has rapidly grown into a nationwide dialogue. By 2024, KMUN welcomed delegates from schools and colleges across India, establishing itself as a hub for meaningful political discourse and diplomacy-driven collaboration.
+
+Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds to engage in compelling discussions, challenge perspectives, and sharpen the art of negotiation. This year, we are committed to elevating debates, broadening participation, and strengthening the voice of youth in shaping conversations that matter.
+
+ Step into KMUN 2025 — where ideas meet action, and student leaders shape tomorrow’s politics.
               </p>
               
               <Link
@@ -225,7 +234,7 @@ const Home: React.FC = () => {
               ABOUT KMUN 2025
             </h2>
             <p className="text-lg max-w-4xl mx-auto leading-relaxed">
-              Kumaraguru Model United Nations 2025 is the premier MUN conference in South India, bringing together students from across the globe to simulate the United Nations. Our conference provides a unique platform for young leaders to develop their diplomatic skills, engage in meaningful debates, and build lasting international friendships.
+            Kumaraguru Model United Nations 2025 is one of South India’s premier MUN conferences, hosted by Kumaraguru Institutions. Bringing together delegates from across the globe, the conference provides a distinguished platform to simulate the workings of the United Nations. Through structured debates, negotiations, and resolution drafting, KMUN fosters diplomatic skill, critical thinking, and cross-cultural understanding. Beyond discourse, it encourages collaboration and leadership, enabling students to engage with pressing global issues while building lasting international connections. KMUN 2025 aspires to inspire young minds to become thoughtful, responsible, and impactful global citizens.
             </p>
           </motion.div>
         </div>

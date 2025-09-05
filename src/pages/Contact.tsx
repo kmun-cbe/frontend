@@ -35,18 +35,30 @@ const Contact: React.FC = () => {
   const onSubmit = async (data: ContactForm) => {
     const loadingToast = toast.loading('Sending message...');
     setLoading(true);
-    console.log('Contact Form Data:', data);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success('Message sent successfully! We\'ll get back to you soon.', { id: loadingToast });
-    setSubmitted(true);
-    setLoading(false);
-    reset();
-    
-    // Reset success message after 3 seconds
-    setTimeout(() => setSubmitted(false), 3000);
+    try {
+      // Import the contactAPI
+      const { contactAPI } = await import('../services/api');
+      
+      // Submit to backend
+      const response = await contactAPI.submit(data);
+      
+      if (response.success) {
+        toast.success('Message sent successfully! We\'ll get back to you soon.', { id: loadingToast });
+        setSubmitted(true);
+        reset();
+        
+        // Reset success message after 3 seconds
+        setTimeout(() => setSubmitted(false), 3000);
+      } else {
+        throw new Error(response.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to send message. Please try again.', { id: loadingToast });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const contactInfo = [

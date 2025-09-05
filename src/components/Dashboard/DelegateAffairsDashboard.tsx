@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ContactFormsManager from './ContactFormsManager';
 
 const DelegateAffairsDashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -235,8 +236,13 @@ const DelegateAffairsDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* Contact Forms Tab */}
+            {activeTab === 'contact' && (
+              <ContactFormsManager />
+            )}
+
             {/* Other tabs */}
-            {activeTab !== 'registrations' && activeTab !== 'allocation' && (
+            {activeTab !== 'registrations' && activeTab !== 'allocation' && activeTab !== 'contact' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}

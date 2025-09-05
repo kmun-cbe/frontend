@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/api': {
-          target: env.VITE_API_URL || 'https://backend-7rnp.onrender.com/api',
+          target: env.VITE_API_URL || 'https://backend-7rnp.onrender.com',
           changeOrigin: true,
           secure: false,
         },

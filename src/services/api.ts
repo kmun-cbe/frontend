@@ -1,5 +1,5 @@
 // API service for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL ;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -31,7 +31,7 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
 // Auth API
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -99,6 +99,10 @@ export const registrationAPI = {
 export const committeesAPI = {
   getAll: async () => {
     return authenticatedFetch('/api/committees');
+  },
+
+  getByInstitutionType: async (institutionType: string) => {
+    return authenticatedFetch(`/api/committees/institution/${institutionType}`);
   },
 
   getById: async (id: string) => {
@@ -239,7 +243,7 @@ export const dashboardAPI = {
 // Health check
 export const healthAPI = {
   check: async () => {
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetch(`${API_BASE_URL}/api/health`);
     return response.json();
   },
 };
@@ -247,7 +251,7 @@ export const healthAPI = {
 // Contact API
 export const contactAPI = {
   submit: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/contact`, {
+    const response = await fetch(`${API_BASE_URL}/api/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -262,22 +266,22 @@ export const contactAPI = {
   },
 
   getAll: async () => {
-    return authenticatedFetch('/contact');
+    return authenticatedFetch('/api/contact');
   },
 
   getById: async (id: string) => {
-    return authenticatedFetch(`/contact/${id}`);
+    return authenticatedFetch(`/api/contact/${id}`);
   },
 
   update: async (id: string, data: any) => {
-    return authenticatedFetch(`/contact/${id}`, {
+    return authenticatedFetch(`/api/contact/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   delete: async (id: string) => {
-    return authenticatedFetch(`/contact/${id}`, {
+    return authenticatedFetch(`/api/contact/${id}`, {
       method: 'DELETE',
     });
   },

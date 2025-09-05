@@ -60,10 +60,10 @@ const Header: React.FC = () => {
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link to="/about" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
+              <a href="https://kumaraguru.in/" target="_blank" rel="noopener noreferrer" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
                 About
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
+              </a>
               <Link to="/committees" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
                 Committees
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
@@ -166,13 +166,15 @@ const Header: React.FC = () => {
               >
                 Home
               </Link>
-              <Link
-                to="/about"
+              <a
+                href="https://kumaraguru.in/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-700 hover:text-primary-900 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
-              </Link>
+              </a>
               <Link
                 to="/committees"
                 className="text-gray-700 hover:text-primary-900 transition-colors"

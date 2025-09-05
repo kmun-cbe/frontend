@@ -35,8 +35,7 @@ const Footer: React.FC = () => {
               <span className="text-xl font-bold">Kumaraguru MUN 2025</span>
             </div>
             <p className="text-gray-300 mb-6 max-w-md">
-              Join us for an extraordinary Model United Nations experience where future leaders 
-              engage in diplomatic discourse and tackle the world's most pressing challenges.
+            Join and be part of an unforgettable Model United Nations journey—where tomorrow’s leaders unite, debate, and shape solutions for the world’s biggest challenges!
             </p>
             <div className="space-y-2 mb-4">
               <div className="flex items-center space-x-2">
@@ -55,22 +54,23 @@ const Footer: React.FC = () => {
 
             {/* Social Media Links */}
             <div className="flex space-x-4">
-              <a href="https://wa.me/your-number" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-green-500 transition-colors">
+              <a href="https://whatsapp.com/channel/0029VakrkxbGk1FnwjFtAY3J" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-green-500 transition-colors">
                 <FaWhatsapp className="text-white w-5 h-5" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-pink-500 transition-colors">
+              <a href="https://www.instagram.com/kumaraguru_mun?igsh=aXRwbHJ2eXZpejR1" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-pink-500 transition-colors">
                 <FaInstagram className="text-white w-5 h-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-blue-600 transition-colors">
+              <a href="https://www.facebook.com/people/Kumaraguru-Mun/61563224850128/?mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-blue-600 transition-colors">
                 <FaFacebook className="text-white w-5 h-5" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-blue-500 transition-colors">
+              <a href="https://www.linkedin.com/company/kumaraguru-model-united-nations/" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-blue-500 transition-colors">
                 <FaLinkedin className="text-white w-5 h-5" />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-red-600 transition-colors">
+              <a href="https://youtube.com/@kumaragurumun?si=VQhbzQkBMNCkntHI" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-red-600 transition-colors">
                 <FaYoutube className="text-white w-5 h-5" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-black transition-colors">
+              <a href="https://x.com/kumaraguru_mun?t=Kgn8D589diVxO5EIRbD3lA&s=09
+              " target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-black transition-colors">
                 <FaXTwitter className="text-white w-5 h-5" />
               </a>
             </div>
@@ -81,7 +81,7 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 hover:text-white transition-colors">Home</Link></li>
-              <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link></li>
+              <li><a href="https://kumaraguru.in/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">About</a></li>
               <li><Link to="/committees" className="text-gray-300 hover:text-white transition-colors">Committees</Link></li>
               <li><Link to="/resources" className="text-gray-300 hover:text-white transition-colors">Resources</Link></li>
               <li><Link to="/gallery" className="text-gray-300 hover:text-white transition-colors">Gallery</Link></li>

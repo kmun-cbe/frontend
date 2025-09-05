@@ -19,12 +19,13 @@ const Popup: React.FC = () => {
     const fetchPopup = async () => {
       try {
         const response = await popupAPI.getActive();
-        if (response.success && response.data) {
+        if (response.success && response.data && response.data.isActive) {
           setPopup(response.data);
           setIsVisible(true);
         }
       } catch (error) {
         console.error('Error fetching popup:', error);
+        // Don't show popup if there's an error
       } finally {
         setIsLoading(false);
       }
@@ -37,7 +38,7 @@ const Popup: React.FC = () => {
     setIsVisible(false);
   };
 
-  if (isLoading || !popup || !popup.isActive) {
+  if (isLoading || !popup || !popup.isActive || !isVisible) {
     return null;
   }
 

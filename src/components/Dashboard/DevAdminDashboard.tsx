@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { dashboardAPI, pricingAPI, popupAPI } from '../../services/api';
+import { dashboardAPI, pricingAPI, popupAPI, committeesAPI } from '../../services/api';
+import ContactFormsManager from './ContactFormsManager';
 import toast from 'react-hot-toast';
 
 interface DashboardStats {
@@ -389,14 +390,23 @@ const PopupManagement: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
+      
+      // Validate form data
+      if (!formData.heading.trim() || !formData.text.trim()) {
+        toast.error('Please fill in both heading and text fields');
+        return;
+      }
+      
       const response = await popupAPI.update(formData);
       if (response.success) {
         setPopup(response.data);
         toast.success('Popup updated successfully');
+      } else {
+        throw new Error(response.message || 'Failed to update popup');
       }
     } catch (error) {
       console.error('Error updating popup:', error);
-      toast.error('Failed to update popup');
+      toast.error(error instanceof Error ? error.message : 'Failed to update popup');
     } finally {
       setSaving(false);
     }
@@ -410,10 +420,12 @@ const PopupManagement: React.FC = () => {
         setPopup(response.data);
         setFormData(prev => ({ ...prev, isActive: newActiveState }));
         toast.success(`Popup ${newActiveState ? 'activated' : 'deactivated'} successfully`);
+      } else {
+        throw new Error(response.message || 'Failed to toggle popup');
       }
     } catch (error) {
       console.error('Error toggling popup:', error);
-      toast.error('Failed to toggle popup');
+      toast.error(error instanceof Error ? error.message : 'Failed to toggle popup');
     }
   };
 
@@ -491,6 +503,7 @@ const PopupManagement: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
               placeholder="Enter popup heading..."
               maxLength={100}
+              required
             />
             <p className="text-xs text-gray-500">{formData.heading.length}/100 characters</p>
           </div>
@@ -507,6 +520,7 @@ const PopupManagement: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172d9d] focus:border-transparent resize-none"
               placeholder="Enter popup content..."
               maxLength={1000}
+              required
             />
             <p className="text-xs text-gray-500">{formData.text.length}/1000 characters</p>
           </div>
@@ -564,6 +578,302 @@ const PopupManagement: React.FC = () => {
   );
 };
 
+// Committee Management Component
+const CommitteeManagement: React.FC = () => {
+  const [committees, setCommittees] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    institutionType: '',
+    description: '',
+    capacity: '',
+    topics: '',
+    chairs: '',
+    portfolios: ''
+  });
+
+  useEffect(() => {
+    fetchCommittees();
+  }, []);
+
+  const fetchCommittees = async () => {
+    try {
+      setLoading(true);
+      const response = await committeesAPI.getAll();
+      if (response.success) {
+        setCommittees(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching committees:', error);
+      toast.error('Failed to load committees');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const committeeData = {
+        ...formData,
+        capacity: parseInt(formData.capacity) || 0,
+        topics: formData.topics ? formData.topics.split(',').map(t => t.trim()) : [],
+        chairs: formData.chairs ? formData.chairs.split(',').map(c => c.trim()) : [],
+        portfolios: formData.portfolios ? formData.portfolios.split(',').map(p => p.trim()) : []
+      };
+
+      const response = await committeesAPI.create(committeeData);
+      if (response.success) {
+        toast.success('Committee created successfully');
+        setShowAddForm(false);
+        setFormData({
+          name: '',
+          institutionType: '',
+          description: '',
+          capacity: '',
+          topics: '',
+          chairs: '',
+          portfolios: ''
+        });
+        fetchCommittees();
+      }
+    } catch (error) {
+      console.error('Error creating committee:', error);
+      toast.error('Failed to create committee');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this committee?')) {
+      try {
+        await committeesAPI.delete(id);
+        toast.success('Committee deleted successfully');
+        fetchCommittees();
+      } catch (error) {
+        console.error('Error deleting committee:', error);
+        toast.error('Failed to delete committee');
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-2 text-gray-600">Loading committees...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-gray-900">Committee Management</h2>
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          {showAddForm ? 'Cancel' : 'Add Committee'}
+        </button>
+      </div>
+
+      {/* Add Committee Form */}
+      {showAddForm && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Committee</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Institution Type <span className="text-red-600">*</span>
+                </label>
+                <select
+                  value={formData.institutionType}
+                  onChange={(e) => setFormData({...formData, institutionType: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">Select institution type</option>
+                  <option value="school">School</option>
+                  <option value="college">College</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Committee Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter committee name"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter committee description"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Capacity
+                </label>
+                <input
+                  type="number"
+                  value={formData.capacity}
+                  onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter capacity"
+                  min="1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Topics (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={formData.topics}
+                  onChange={(e) => setFormData({...formData, topics: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Topic 1, Topic 2, Topic 3"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Chairs (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={formData.chairs}
+                  onChange={(e) => setFormData({...formData, chairs: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Chair 1, Chair 2"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Portfolios (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={formData.portfolios}
+                onChange={(e) => setFormData({...formData, portfolios: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Portfolio 1, Portfolio 2, Portfolio 3"
+              />
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Create Committee
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Committees Table */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Current Committees</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Institution Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Committee Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Capacity
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {committees.length > 0 ? (
+                committees.map((committee) => (
+                  <tr key={committee.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        committee.institutionType === 'school' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {committee.institutionType || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {committee.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                      {committee.description || 'No description'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {committee.capacity || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleDelete(committee.id)}
+                        className="text-red-600 hover:text-red-900 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                    No committees found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DevAdminDashboard: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -596,7 +906,7 @@ const DevAdminDashboard: React.FC = () => {
 
   const checkSystemStatus = async () => {
     try {
-              const apiBaseUrl = import.meta.env.VITE_API_URL ;
+              const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
         
         // Check database connection
         const dbResponse = await fetch(`${apiBaseUrl}/health/database`);
@@ -960,8 +1270,18 @@ const DevAdminDashboard: React.FC = () => {
               <PopupManagement />
             )}
 
+            {/* Committee Management Tab */}
+            {activeTab === 'committees' && (
+              <CommitteeManagement />
+            )}
+
+            {/* Contact Forms Tab */}
+            {activeTab === 'contact' && (
+              <ContactFormsManager />
+            )}
+
             {/* Other tabs content would be implemented here */}
-            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && (
+            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'contact' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}
