@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Search, 
@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import ContactFormsManager from './ContactFormsManager';
 import Mailer from '../Common/Mailer';
 import toast from 'react-hot-toast';
-import { mailerAPI } from '../../services/api';
+import { mailerAPI, registrationAPI } from '../../services/api';
 
 const DelegateAffairsDashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -34,36 +34,33 @@ const DelegateAffairsDashboard: React.FC = () => {
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
-  const registrations = [
-    {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Smith',
-      email: 'john@university.edu',
-      institution: 'Harvard University',
-      status: 'PENDING',
-      paymentStatus: 'PAID',
-      preferences: {
-        committee1: 'UNSC',
-        committee2: 'GA',
-        committee3: 'ECOSOC'
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRegistrations();
+  }, []);
+
+  const fetchRegistrations = async () => {
+    try {
+      setLoading(true);
+      const response = await registrationAPI.getAll();
+      console.log('Registration API Response:', response); // Debug log
+      
+      if (response.success) {
+        // Handle nested data structure from backend
+        const registrationsData = response.data?.registrations || response.data || [];
+        setRegistrations(registrationsData);
+      } else {
+        throw new Error(response.message || 'Failed to fetch registrations');
       }
-    },
-    {
-      id: 2,
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah@college.edu',
-      institution: 'MIT',
-      status: 'CONFIRMED',
-      paymentStatus: 'PAID',
-      preferences: {
-        committee1: 'GA',
-        committee2: 'HRC',
-        committee3: 'WHO'
-      }
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      toast.error(`Failed to load registrations: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -160,6 +157,9 @@ const DelegateAffairsDashboard: React.FC = () => {
                             Committee Preferences
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Allocated
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -183,10 +183,20 @@ const DelegateAffairsDashboard: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               <div>
-                                1. {registration.preferences.committee1}<br/>
-                                2. {registration.preferences.committee2}<br/>
-                                3. {registration.preferences.committee3}
+                                1. {registration.committeePreference1}<br/>
+                                2. {registration.committeePreference2}<br/>
+                                3. {registration.committeePreference3}
                               </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {registration.allocatedCommittee ? (
+                                <div>
+                                  <div className="font-medium text-blue-600">{registration.allocatedCommittee}</div>
+                                  <div className="text-xs text-gray-500">{registration.allocatedPortfolio || 'No Portfolio'}</div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">Not Allocated</span>
+                              )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -260,12 +270,17 @@ const DelegateAffairsDashboard: React.FC = () => {
                   onSend={async (emailData) => {
                     try {
                       const result = await mailerAPI.sendBulkEmail(emailData);
-                      if (!result.success) {
-                        throw new Error(result.message || 'Failed to send email');
+                      console.log('Mailer API Response:', result); // Debug log
+                      
+                      if (result && result.success) {
+                        const totalSent = result.data?.totalSent || result.totalSent || 1;
+                        toast.success(`Email sent successfully to ${totalSent} recipient(s)!`);
+                      } else {
+                        throw new Error(result?.message || 'Failed to send email');
                       }
-                      toast.success(`Email sent successfully to ${result.data.totalSent} recipients!`);
                     } catch (error) {
                       console.error('Error sending email:', error);
+                      toast.error(`Failed to send email: ${error.message}`);
                       throw error;
                     }
                   }}

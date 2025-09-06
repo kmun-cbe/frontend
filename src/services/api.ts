@@ -15,17 +15,22 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`API Error for ${url}:`, error);
+    throw error;
   }
-
-  return response.json();
 };
 
 // Auth API
@@ -67,7 +72,7 @@ export const authAPI = {
 // Registration API
 export const registrationAPI = {
   create: async (data: FormData) => {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/api/registrations`, {
       method: 'POST',
       headers: {
@@ -109,6 +114,10 @@ export const registrationAPI = {
 export const committeesAPI = {
   getAll: async () => {
     return authenticatedFetch('/api/committees');
+  },
+
+  getFeatured: async () => {
+    return authenticatedFetch('/api/committees/featured');
   },
 
   getByInstitutionType: async (institutionType: string) => {
@@ -196,6 +205,13 @@ export const usersAPI = {
   delete: async (id: string) => {
     return authenticatedFetch(`/api/users/${id}`, {
       method: 'DELETE',
+    });
+  },
+
+  changePassword: async (id: string, newPassword: string) => {
+    return authenticatedFetch(`/api/users/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ password: newPassword }),
     });
   },
 };
@@ -312,7 +328,7 @@ export const healthAPI = {
 // Contact API
 export const contactAPI = {
   submit: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/api/contact`, {
+    const response = await fetch('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -354,7 +370,11 @@ export const popupAPI = {
     return authenticatedFetch('/api/popups');
   },
   getActive: async () => {
-    return fetch(`${API_BASE_URL}/api/popups/active`);
+    const response = await fetch('/api/popups/active');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
   },
   update: async (data: any) => {
     return authenticatedFetch('/api/popups', {

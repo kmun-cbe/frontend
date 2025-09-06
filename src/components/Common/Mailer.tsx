@@ -99,8 +99,13 @@ const Mailer: React.FC<MailerProps> = ({
       } else {
         // Use the mailer API
         const result = await mailerAPI.sendBulkEmail(emailData);
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to send email');
+        console.log('Mailer API Response:', result); // Debug log
+        
+        if (result && result.success) {
+          const totalSent = result.data?.totalSent || result.totalSent || 1;
+          toast.success(`Email sent successfully to ${totalSent} recipient(s)!`);
+        } else {
+          throw new Error(result?.message || 'Failed to send email');
         }
       }
 

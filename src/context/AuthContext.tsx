@@ -21,12 +21,12 @@ export const useAuth = () => {
 };
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // API service functions
 const apiService = {
   async login(email: string, password: string) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const apiService = {
   },
 
   async getProfile(token: string) {
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',

@@ -19,13 +19,20 @@ const Popup: React.FC = () => {
     const fetchPopup = async () => {
       try {
         const response = await popupAPI.getActive();
+        console.log('Popup API response:', response);
+        
         if (response.success && response.data && response.data.isActive) {
           setPopup(response.data);
           setIsVisible(true);
+        } else {
+          console.log('No active popup found');
+          setPopup(null);
+          setIsVisible(false);
         }
       } catch (error) {
         console.error('Error fetching popup:', error);
-        // Don't show popup if there's an error
+        setPopup(null);
+        setIsVisible(false);
       } finally {
         setIsLoading(false);
       }
@@ -38,7 +45,11 @@ const Popup: React.FC = () => {
     setIsVisible(false);
   };
 
-  if (isLoading || !popup || !popup.isActive || !isVisible) {
+  if (isLoading) {
+    return null;
+  }
+  
+  if (!popup || !popup.isActive || !isVisible) {
     return null;
   }
 
@@ -51,7 +62,7 @@ const Popup: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[9999]"
             onClick={handleClose}
           />
           
@@ -61,9 +72,9 @@ const Popup: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4"
+            className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
           >
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md mx-auto">
               {/* Header with X button */}
               <div className="relative p-6 pb-4">
                 <button

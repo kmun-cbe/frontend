@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
+import { useFormStepScroll } from '../../hooks/useScrollToTop';
 import { 
   User, 
   Mail, 
@@ -54,11 +55,17 @@ interface RegistrationForm {
   totalMuns: string;
   requiresAccommodation: string;
   committeePreference1: string;
-  portfolioPreference1: string;
+  portfolioPreference1_1: string;
+  portfolioPreference1_2: string;
+  portfolioPreference1_3: string;
   committeePreference2: string;
-  portfolioPreference2: string;
+  portfolioPreference2_1: string;
+  portfolioPreference2_2: string;
+  portfolioPreference2_3: string;
   committeePreference3: string;
-  portfolioPreference3: string;
+  portfolioPreference3_1: string;
+  portfolioPreference3_2: string;
+  portfolioPreference3_3: string;
   idDocument: FileList;
   munResume?: FileList;
   terms: boolean;
@@ -206,6 +213,9 @@ const Register: React.FC = () => {
     setStep(step - 1);
   };
 
+  // Scroll to top when step changes
+  useFormStepScroll(step, '.registration-form-container');
+
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center py-12 px-4">
@@ -251,7 +261,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
-      <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8 registration-form-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -315,7 +325,7 @@ const Register: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Personal Information</h2>
                 
                 {/* Full Name Field */}
                 <div>
@@ -475,6 +485,7 @@ const Register: React.FC = () => {
                         <option value="">Select institution type</option>
                         <option value="school">School</option>
                         <option value="college">College</option>
+                        <option value="both">Both School & College</option>
                       </select>
                       {errors.institutionType && (
                         <p className="mt-1 text-sm text-red-600">{errors.institutionType.message}</p>
@@ -606,10 +617,10 @@ const Register: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Committee & Portfolio Preferences</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Committee & Portfolio Preferences</h2>
                 
-                <p className="text-sm text-gray-600 mb-6">
-                  Select your top 3 committee and portfolio preferences in order of preference.
+                <p className="text-sm text-gray-600 mb-6 text-center">
+                  Select your top 3 committee preferences and 3 portfolio preferences for each committee.
                 </p>
                 
                 {committeesLoading ? (
@@ -621,12 +632,13 @@ const Register: React.FC = () => {
                   <div className="space-y-8">
                     {[1, 2, 3].map((num) => (
                       <div key={num} className="border border-gray-200 rounded-lg p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Preference {num}</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">Committee Preference {num}</h3>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-6">
+                          {/* Committee Selection */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Committee Preference {num} <span className="text-red-600">*</span>
+                              Committee <span className="text-red-600">*</span>
                             </label>
                             <select
                               {...register(`committeePreference${num}` as keyof RegistrationForm, {
@@ -648,13 +660,18 @@ const Register: React.FC = () => {
                             )}
                           </div>
 
-                          <div>
+                          {/* Portfolio Preferences */}
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <h4 className="text-md font-medium text-gray-800 mb-4">Portfolio Preferences (in order of preference)</h4>
+                            <div className="space-y-4">
+                              {[1, 2, 3].map((portfolioNum) => (
+                                <div key={portfolioNum}>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Portfolio Preference {num} <span className="text-red-600">*</span>
+                                    Portfolio Preference {portfolioNum} <span className="text-red-600">*</span>
                             </label>
                             <select
-                              {...register(`portfolioPreference${num}` as keyof RegistrationForm, {
-                                required: `Portfolio preference ${num} is required`
+                                    {...register(`portfolioPreference${num}_${portfolioNum}` as keyof RegistrationForm, {
+                                      required: `Portfolio preference ${portfolioNum} for committee ${num} is required`
                               })}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             >
@@ -665,11 +682,14 @@ const Register: React.FC = () => {
                                 </option>
                               ))}
                             </select>
-                            {errors[`portfolioPreference${num}` as keyof RegistrationForm] && (
+                                  {errors[`portfolioPreference${num}_${portfolioNum}` as keyof RegistrationForm] && (
                               <p className="mt-1 text-sm text-red-600">
-                                {errors[`portfolioPreference${num}` as keyof RegistrationForm]?.message}
+                                      {errors[`portfolioPreference${num}_${portfolioNum}` as keyof RegistrationForm]?.message}
                               </p>
                             )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -685,7 +705,7 @@ const Register: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Document Upload</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Document Upload</h2>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

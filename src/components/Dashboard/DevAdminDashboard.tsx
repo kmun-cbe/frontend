@@ -23,8 +23,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { dashboardAPI, pricingAPI, popupAPI, committeesAPI, registrationAPI, mailerAPI } from '../../services/api';
 import ContactFormsManager from './ContactFormsManager';
+import { useFormOpenScroll } from '../../hooks/useScrollToTop';
 import Mailer from '../Common/Mailer';
 import TransactionRecords from './TransactionRecords';
+import PortfolioManager from './PortfolioManager';
+import UserManagement from './UserManagement';
 import toast from 'react-hot-toast';
 import { getImageUrl } from '../../utils/images';
 
@@ -501,6 +504,8 @@ const PopupManagement: React.FC = () => {
 const RegistrationsManagement: React.FC = () => {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
@@ -510,15 +515,31 @@ const RegistrationsManagement: React.FC = () => {
     try {
       setLoading(true);
       const response = await registrationAPI.getAll();
+      console.log('Registration API Response:', response); // Debug log
+      
       if (response.success) {
-        setRegistrations(response.data);
+        // Handle nested data structure from backend
+        const registrationsData = response.data?.registrations || response.data || [];
+        setRegistrations(registrationsData);
+      } else {
+        throw new Error(response.message || 'Failed to fetch registrations');
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      toast.error('Failed to load registrations');
+      toast.error(`Failed to load registrations: ${error.message}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewDetails = (registration: any) => {
+    setSelectedRegistration(registration);
+    setShowDetails(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetails(false);
+    setSelectedRegistration(null);
   };
 
   if (loading) {
@@ -564,13 +585,16 @@ const RegistrationsManagement: React.FC = () => {
                     Institution
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Accommodation
+                    Committee Preferences
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Allocated
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Submitted
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -581,21 +605,33 @@ const RegistrationsManagement: React.FC = () => {
                       <div className="text-sm font-medium text-gray-900">
                         {registration.firstName} {registration.lastName}
                       </div>
+                      <div className="text-sm text-gray-500">{registration.phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{registration.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{registration.institution || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">{registration.institutionType || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        registration.requiresAccommodation 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {registration.requiresAccommodation ? 'Yes' : 'No'}
-                      </span>
+                      <div className="text-sm text-gray-900">
+                        <div>1. {registration.committeePreference1}</div>
+                        <div>2. {registration.committeePreference2}</div>
+                        <div>3. {registration.committeePreference3}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {registration.allocatedCommittee ? (
+                          <div>
+                            <div className="font-medium text-blue-600">{registration.allocatedCommittee}</div>
+                            <div className="text-xs text-gray-500">{registration.allocatedPortfolio || 'No Portfolio'}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">Not Allocated</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -608,13 +644,141 @@ const RegistrationsManagement: React.FC = () => {
                         {registration.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(registration.submittedAt).toLocaleDateString()}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleViewDetails(registration)}
+                        className="text-blue-600 hover:text-blue-900 transition-colors"
+                      >
+                        View Details
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Registration Details Modal */}
+        {showDetails && selectedRegistration && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Registration Details - {selectedRegistration.firstName} {selectedRegistration.lastName}
+                  </h3>
+                  <button
+                    onClick={handleCloseDetails}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Personal Information */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">Personal Information</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><span className="font-medium">Name:</span> {selectedRegistration.firstName} {selectedRegistration.lastName}</div>
+                      <div><span className="font-medium">Email:</span> {selectedRegistration.email}</div>
+                      <div><span className="font-medium">Phone:</span> {selectedRegistration.phone}</div>
+                      <div><span className="font-medium">Gender:</span> {selectedRegistration.gender}</div>
+                      <div><span className="font-medium">Roll Number:</span> {selectedRegistration.rollNumber || 'N/A'}</div>
+                      <div><span className="font-medium">Total MUNs:</span> {selectedRegistration.totalMuns}</div>
+                    </div>
+                  </div>
+
+                  {/* Institution Information */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">Institution Information</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><span className="font-medium">Type:</span> {selectedRegistration.institutionType || 'N/A'}</div>
+                      <div><span className="font-medium">Name:</span> {selectedRegistration.institution || 'N/A'}</div>
+                      <div><span className="font-medium">City:</span> {selectedRegistration.cityOfInstitution || 'N/A'}</div>
+                      <div><span className="font-medium">State:</span> {selectedRegistration.stateOfInstitution || 'N/A'}</div>
+                      <div><span className="font-medium">Grade:</span> {selectedRegistration.grade || 'N/A'}</div>
+                      <div><span className="font-medium">Kumaraguru:</span> {selectedRegistration.isKumaraguru ? 'Yes' : 'No'}</div>
+                    </div>
+                  </div>
+
+                  {/* Committee Preferences */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">Committee Preferences</h4>
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <span className="font-medium">1st Preference:</span>
+                        <div className="ml-4">
+                          <div>Committee: {selectedRegistration.committeePreference1}</div>
+                          <div>Portfolio: {selectedRegistration.portfolioPreference1}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium">2nd Preference:</span>
+                        <div className="ml-4">
+                          <div>Committee: {selectedRegistration.committeePreference2}</div>
+                          <div>Portfolio: {selectedRegistration.portfolioPreference2}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium">3rd Preference:</span>
+                        <div className="ml-4">
+                          <div>Committee: {selectedRegistration.committeePreference3}</div>
+                          <div>Portfolio: {selectedRegistration.portfolioPreference3}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Allocation & Status */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">Allocation & Status</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><span className="font-medium">Status:</span> 
+                        <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                          selectedRegistration.status === 'PENDING' 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : selectedRegistration.status === 'APPROVED'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedRegistration.status}
+                        </span>
+                      </div>
+                      <div><span className="font-medium">Allocated Committee:</span> 
+                        <span className="ml-2 text-blue-600 font-medium">
+                          {selectedRegistration.allocatedCommittee || 'Not Allocated'}
+                        </span>
+                      </div>
+                      <div><span className="font-medium">Allocated Portfolio:</span> 
+                        <span className="ml-2 text-green-600 font-medium">
+                          {selectedRegistration.allocatedPortfolio || 'Not Allocated'}
+                        </span>
+                      </div>
+                      <div><span className="font-medium">Accommodation:</span> 
+                        {selectedRegistration.requiresAccommodation ? 'Required' : 'Not Required'}
+                      </div>
+                      <div><span className="font-medium">Submitted:</span> 
+                        {new Date(selectedRegistration.submittedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={handleCloseDetails}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -627,9 +791,11 @@ const CommitteeManagement: React.FC = () => {
   const [committees, setCommittees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingCommittee, setEditingCommittee] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     institutionType: '',
+    type: '',
     description: '',
     capacity: '',
     topics: '',
@@ -641,16 +807,25 @@ const CommitteeManagement: React.FC = () => {
     fetchCommittees();
   }, []);
 
+  // Scroll to top when form is opened
+  useFormOpenScroll(showAddForm, '.committee-form-container');
+
   const fetchCommittees = async () => {
     try {
       setLoading(true);
       const response = await committeesAPI.getAll();
+      console.log('Committees API Response:', response); // Debug log
+      
       if (response.success) {
-        setCommittees(response.data);
+        // Handle nested data structure from backend
+        const committeesData = response.data || [];
+        setCommittees(committeesData);
+      } else {
+        throw new Error(response.message || 'Failed to fetch committees');
       }
     } catch (error) {
       console.error('Error fetching committees:', error);
-      toast.error('Failed to load committees');
+      toast.error(`Failed to load committees: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -658,6 +833,23 @@ const CommitteeManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.name || !formData.institutionType || !formData.type || !formData.description || !formData.capacity) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    if (formData.description.length < 20) {
+      toast.error('Description must be at least 20 characters long');
+      return;
+    }
+    
+    if (parseInt(formData.capacity) < 1) {
+      toast.error('Capacity must be at least 1');
+      return;
+    }
+    
     try {
       const committeeData = {
         ...formData,
@@ -667,13 +859,26 @@ const CommitteeManagement: React.FC = () => {
         portfolios: formData.portfolios ? formData.portfolios.split(',').map(p => p.trim()) : []
       };
 
-      const response = await committeesAPI.create(committeeData);
+      let response;
+      if (editingCommittee) {
+        response = await committeesAPI.update(editingCommittee.id, committeeData);
+        if (response.success) {
+          toast.success('Committee updated successfully');
+        }
+      } else {
+        response = await committeesAPI.create(committeeData);
+        if (response.success) {
+          toast.success('Committee created successfully');
+        }
+      }
+      
       if (response.success) {
-        toast.success('Committee created successfully');
         setShowAddForm(false);
+        setEditingCommittee(null);
         setFormData({
           name: '',
           institutionType: '',
+          type: '',
           description: '',
           capacity: '',
           topics: '',
@@ -683,9 +888,39 @@ const CommitteeManagement: React.FC = () => {
         fetchCommittees();
       }
     } catch (error) {
-      console.error('Error creating committee:', error);
-      toast.error('Failed to create committee');
+      console.error('Error saving committee:', error);
+      toast.error(editingCommittee ? 'Failed to update committee' : 'Failed to create committee');
     }
+  };
+
+  const handleEdit = (committee: any) => {
+    setEditingCommittee(committee);
+    setFormData({
+      name: committee.name || '',
+      institutionType: committee.institutionType || '',
+      type: committee.type || '',
+      description: committee.description || '',
+      capacity: committee.capacity?.toString() || '',
+      topics: committee.topics ? committee.topics.join(', ') : '',
+      chairs: committee.chairs ? committee.chairs.join(', ') : '',
+      portfolios: committee.portfolios ? committee.portfolios.join(', ') : ''
+    });
+    setShowAddForm(true);
+  };
+
+  const handleCancel = () => {
+    setShowAddForm(false);
+    setEditingCommittee(null);
+    setFormData({
+      name: '',
+      institutionType: '',
+      type: '',
+      description: '',
+      capacity: '',
+      topics: '',
+      chairs: '',
+      portfolios: ''
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -729,11 +964,13 @@ const CommitteeManagement: React.FC = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 committee-form-container"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Committee</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {editingCommittee ? 'Edit Committee' : 'Add New Committee'}
+          </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Institution Type <span className="text-red-600">*</span>
@@ -747,6 +984,25 @@ const CommitteeManagement: React.FC = () => {
                   <option value="">Select institution type</option>
                   <option value="school">School</option>
                   <option value="college">College</option>
+                  <option value="both">Both School & College</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Committee Type <span className="text-red-600">*</span>
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({...formData, type: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">Select committee type</option>
+                  <option value="GA">General Assembly (GA)</option>
+                  <option value="SC">Security Council (SC)</option>
+                  <option value="SPECIALIZED">Specialized Agency</option>
+                  <option value="COURT">International Court</option>
+                  <option value="CRISIS">Crisis Committee</option>
                 </select>
               </div>
               <div>
@@ -765,20 +1021,27 @@ const CommitteeManagement: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                Description <span className="text-red-600">*</span>
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter committee description"
+                placeholder="Enter committee description (minimum 20 characters)"
                 rows={3}
+                required
+                minLength={20}
               />
+              {formData.description && formData.description.length < 20 && (
+                <p className="text-red-500 text-sm mt-1">
+                  Description must be at least 20 characters long
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Capacity
+                  Capacity <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="number"
@@ -787,6 +1050,7 @@ const CommitteeManagement: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter capacity"
                   min="1"
+                  required
                 />
               </div>
               <div>
@@ -829,7 +1093,7 @@ const CommitteeManagement: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
+                onClick={handleCancel}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
@@ -838,7 +1102,7 @@ const CommitteeManagement: React.FC = () => {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Create Committee
+                {editingCommittee ? 'Update Committee' : 'Create Committee'}
               </button>
             </div>
           </form>
@@ -856,6 +1120,9 @@ const CommitteeManagement: React.FC = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Institution Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Committee Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Committee Name
@@ -879,9 +1146,16 @@ const CommitteeManagement: React.FC = () => {
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         committee.institutionType === 'school' 
                           ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
+                          : committee.institutionType === 'college'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-purple-100 text-purple-800'
                       }`}>
-                        {committee.institutionType || 'N/A'}
+                        {committee.institutionType === 'both' ? 'School & College' : committee.institutionType?.toUpperCase() || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                        {committee.type || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -894,18 +1168,27 @@ const CommitteeManagement: React.FC = () => {
                       {committee.capacity || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleDelete(committee.id)}
-                        className="text-red-600 hover:text-red-900 transition-colors"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(committee)}
+                          className="text-blue-600 hover:text-blue-900 transition-colors flex items-center"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(committee.id)}
+                          className="text-red-600 hover:text-red-900 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     No committees found
                   </td>
                 </tr>
@@ -953,7 +1236,7 @@ const DevAdminDashboard: React.FC = () => {
               const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
         
         // Check database connection
-        const dbResponse = await fetch(`${apiBaseUrl}/health/database`);
+        const dbResponse = await fetch(`${apiBaseUrl}/api/health/database`);
         setSystemStatus(prev => ({
           ...prev,
           database: {
@@ -963,7 +1246,7 @@ const DevAdminDashboard: React.FC = () => {
         }));
 
         // Check payment gateway
-        const paymentResponse = await fetch(`${apiBaseUrl}/health/payment`);
+        const paymentResponse = await fetch(`${apiBaseUrl}/api/health/payment`);
         setSystemStatus(prev => ({
           ...prev,
           paymentGateway: {
@@ -973,7 +1256,7 @@ const DevAdminDashboard: React.FC = () => {
         }));
 
         // Check email service
-        const emailResponse = await fetch(`${apiBaseUrl}/health/email`);
+        const emailResponse = await fetch(`${apiBaseUrl}/api/health/email`);
         setSystemStatus(prev => ({
           ...prev,
           emailService: {
@@ -1080,7 +1363,6 @@ const DevAdminDashboard: React.FC = () => {
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'registrations', label: 'Registrations', icon: UserPlus },
-    { id: 'payments', label: 'Transaction Status', icon: CreditCard },
     { id: 'committees', label: 'Committee Manager', icon: FileText },
     { id: 'portfolios', label: 'Portfolio Manager', icon: Edit },
     { id: 'pricing', label: 'Pricing', icon: Settings },
@@ -1143,32 +1425,32 @@ const DevAdminDashboard: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <nav className="space-y-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-[#172d9d]/10 text-[#172d9d] border-r-2 border-[#172d9d]'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <tab.icon className="w-5 h-5" />
-                    <span className="font-medium text-sm">{tab.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Sidebar - Fixed width */}
+        <div className="w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto">
+          <div className="p-6">
+            <nav className="space-y-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-[#172d9d]/10 text-[#172d9d] border-r-2 border-[#172d9d]'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span className="font-medium text-sm">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
+        {/* Main Content - Takes remaining space */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-8">
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Stats Grid */}
@@ -1216,7 +1498,7 @@ const DevAdminDashboard: React.FC = () => {
                                  {/* Quick Actions */}
                  <div className="bg-white rounded-lg shadow-sm p-6">
                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <button 
                        onClick={() => setActiveTab('users')}
                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
@@ -1224,14 +1506,6 @@ const DevAdminDashboard: React.FC = () => {
                        <UserPlus className="w-6 h-6 text-[#172d9d] mb-2" />
                        <h4 className="font-medium text-gray-900">Add New User</h4>
                        <p className="text-sm text-gray-600">Create admin or delegate account</p>
-                     </button>
-                     <button 
-                       onClick={() => setActiveTab('payments')}
-                       className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                     >
-                       <CreditCard className="w-6 h-6 text-green-600 mb-2" />
-                       <h4 className="font-medium text-gray-900">Transaction Status</h4>
-                       <p className="text-sm text-gray-600">View and manage payment transactions</p>
                      </button>
                      <button 
                        onClick={() => setActiveTab('notifications')}
@@ -1388,12 +1662,17 @@ const DevAdminDashboard: React.FC = () => {
                   onSend={async (emailData) => {
                     try {
                       const result = await mailerAPI.sendBulkEmail(emailData);
-                      if (!result.success) {
-                        throw new Error(result.message || 'Failed to send email');
+                      console.log('Mailer API Response:', result); // Debug log
+                      
+                      if (result && result.success) {
+                        const totalSent = result.data?.totalSent || result.totalSent || 1;
+                        toast.success(`Email sent successfully to ${totalSent} recipient(s)!`);
+                      } else {
+                        throw new Error(result?.message || 'Failed to send email');
                       }
-                      toast.success(`Email sent successfully to ${result.data.totalSent} recipients!`);
                     } catch (error) {
                       console.error('Error sending email:', error);
+                      toast.error(`Failed to send email: ${error.message}`);
                       throw error;
                     }
                   }}
@@ -1408,8 +1687,22 @@ const DevAdminDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* Portfolio Manager Tab */}
+            {activeTab === 'portfolios' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <PortfolioManager />
+              </div>
+            )}
+
+            {/* User Management Tab */}
+            {activeTab === 'users' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <UserManagement />
+              </div>
+            )}
+
             {/* Other tabs content would be implemented here */}
-            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'registrations' && activeTab !== 'contact' && activeTab !== 'mailer' && activeTab !== 'transactions' && (
+            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'registrations' && activeTab !== 'contact' && activeTab !== 'mailer' && activeTab !== 'transactions' && activeTab !== 'portfolios' && activeTab !== 'users' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}

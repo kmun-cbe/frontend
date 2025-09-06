@@ -33,7 +33,9 @@ const Contact: React.FC = () => {
   } = useForm<ContactForm>();
 
   const onSubmit = async (data: ContactForm) => {
-    const loadingToast = toast.loading('Sending message...');
+    const loadingToast = toast.loading('Sending message...', {
+      duration: Infinity, // Keep toast visible until manually dismissed
+    });
     setLoading(true);
     
     try {
@@ -44,18 +46,40 @@ const Contact: React.FC = () => {
       const response = await contactAPI.submit(data);
       
       if (response.success) {
-        toast.success('Message sent successfully! We\'ll get back to you soon.', { id: loadingToast });
+        toast.success('Message sent successfully! We\'ll get back to you soon.', { 
+          id: loadingToast,
+          duration: 5000 
+        });
         setSubmitted(true);
         reset();
         
-        // Reset success message after 3 seconds
-        setTimeout(() => setSubmitted(false), 3000);
+        // Reset success message after 5 seconds
+        setTimeout(() => setSubmitted(false), 5000);
       } else {
         throw new Error(response.message || 'Failed to send message');
       }
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to send message. Please try again.', { id: loadingToast });
+      
+      // Determine error message
+      let errorMessage = 'Failed to send message. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Network Error') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (error.message.includes('400')) {
+          errorMessage = 'Invalid data. Please check your inputs and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage, { 
+        id: loadingToast,
+        duration: 5000 
+      });
     } finally {
       setLoading(false);
     }

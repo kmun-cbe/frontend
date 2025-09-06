@@ -27,6 +27,7 @@ interface Committee {
   topics: string[];
   chairs: string[];
   image: string;
+  institutionType: 'school' | 'college' | 'both';
 }
 
 const Home: React.FC = () => {
@@ -46,10 +47,10 @@ const Home: React.FC = () => {
           setPricing(pricingData.data);
         }
 
-        // Fetch featured committees
-        const committeesData = await committeesAPI.getAll();
+        // Fetch featured committees (first 2)
+        const committeesData = await committeesAPI.getFeatured();
         if (committeesData.success) {
-          setFeaturedCommittees(committeesData.data.slice(0, 3)); // Get first 3 committees
+          setFeaturedCommittees(committeesData.data);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -63,11 +64,11 @@ const Home: React.FC = () => {
   }, []);
 
   const whyKmunFeatures = [
-    { icon: Lightbulb, label: 'SKILLS ACQUIRED' },
-    { icon: BookOpen, label: 'LEADERSHIP TRAINING' },
-    { icon: Users, label: 'CREATIVE SKILLS' },
-    { icon: Heart, label: 'BUILDING RELATIONSHIPS' },
-    { icon: MessageSquare, label: 'NEGOTIATION SKILLS' }
+    { icon: Lightbulb, label: 'TEAM BUILDING' },
+    { icon: BookOpen, label: 'SHARPENING LEADERSHIP SKILLS' },
+    { icon: Users, label: 'ENHANCED CREATIVE THINKING' },
+    { icon: Heart, label: 'NETWORKING' },
+    { icon: MessageSquare, label: 'NEGOTIATION PROFICIENCY' }
   ];
 
   if (loading) {
@@ -268,7 +269,8 @@ Happy MUNning!
                   <div className="mt-8 pt-6 border-t border-gray-200">
                     <p className="text-gray-700">
                       <span className="font-semibold">Sincerely,</span><br />
-                      <span className="font-bold text-[#172d9d]">Kumaraguru MUN 2025 Secretariat</span><br />
+                      <span className="font-bold text-[#172d9d]">The Secretariat</span><br />
+                      <span className="font-bold text-[#172d9d]">Kumaraguru MUN 2025 </span><br />
                       
                       
                       
@@ -281,7 +283,7 @@ Happy MUNning!
               <div className="bg-gray-50 flex items-center justify-center p-8 lg:p-12">
                 <div className="relative">
                   <img 
-                    src="/pic1.jpg" 
+                    src="/logo.png" 
                     alt="Secretariat pic" 
                     className="w-full max-w-sm h-auto rounded-lg shadow-lg object-cover"
                     onError={(e) => {
@@ -323,7 +325,7 @@ Happy MUNning!
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {featuredCommittees.map((committee, index) => (
               <motion.div
                 key={committee.id}
@@ -336,22 +338,42 @@ Happy MUNning!
                   <div className="text-6xl text-white opacity-80">🏛️</div>
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#172d9d] mb-3">
-                    {committee.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-bold text-[#172d9d]">
+                      {committee.name}
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      committee.institutionType === 'school' 
+                        ? 'bg-green-100 text-green-800' 
+                        : committee.institutionType === 'college'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-purple-100 text-purple-800'
+                    }`}>
+                      {committee.institutionType === 'both' ? 'School & College' : committee.institutionType.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
                     {committee.description}
                   </p>
-                  <Link
-                    to="/committees"
-                    className="inline-block bg-[#37c9ee] text-white px-4 py-2 rounded-lg hover:bg-[#1ba1c4] transition-colors"
-                  >
-                    Learn More
-                  </Link>
                 </div>
               </motion.div>
             ))}
           </div>
+          
+          {/* See More Committees Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="text-center mt-12"
+          >
+            <Link
+              to="/committees"
+              className="inline-block bg-[#172d9d] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#1a2a8a] transition-colors"
+            >
+              See More Committees
+            </Link>
+          </motion.div>
         </div>
       </section>
 
@@ -385,9 +407,10 @@ Happy MUNning!
               </div>
               <ul className="text-gray-600 mb-8 space-y-2">
                 <li>Conference Access</li>
-                <li>Delegate Kit</li>
-                <li>Certificate</li>
-                <li>Networking Events</li>
+                <li>Delegate Package</li>
+                <li>Participation Certificate</li>
+                <li>Professional Networking opportunities</li>
+                <li>Lunch and Refreshments</li>
               </ul>
               <Link
                 to="/register"
@@ -408,10 +431,12 @@ Happy MUNning!
                 ₹{pricing.externalDelegate}
               </div>
               <ul className="text-gray-600 mb-8 space-y-2">
-                <li>Conference Access</li>
-                <li>Delegate Kit</li>
-                <li>Certificate</li>
-                <li>Networking Events</li>
+              <li>Conference Access</li>
+                <li>Delegate Package</li>
+                <li>Participation Certificate</li>
+                <li>Professional Networking opportunities</li>
+                <li>Lunch and Refreshments</li>
+                
                 
               </ul>
               <Link
