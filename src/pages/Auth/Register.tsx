@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { useFormStepScroll } from '../../hooks/useScrollToTop';
+import PaymentGateway from '../../components/Common/PaymentGateway';
 import { 
   User, 
   Mail, 
@@ -78,6 +79,8 @@ const Register: React.FC = () => {
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [committeesLoading, setCommitteesLoading] = useState(true);
   const [pricing, setPricing] = useState<PricingData | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [registrationData, setRegistrationData] = useState<any>(null);
   const navigate = useNavigate();
 
   const {
@@ -182,16 +185,11 @@ const Register: React.FC = () => {
       
       if (response.success) {
         toast.success('Registration submitted successfully!', { id: loadingToast });
-        setSubmitted(true);
         setLoading(false);
         
-        // Show user credentials after a delay
-        setTimeout(() => {
-          toast.success(`Registration ID: ${response.registration.id}. Check your email for login credentials.`, {
-            duration: 8000,
-          });
-          navigate('/login');
-        }, 2000);
+        // Store registration data and show payment gateway
+        setRegistrationData(response.registration);
+        setShowPayment(true);
       } else {
         throw new Error(response.message || 'Registration failed');
       }
@@ -200,6 +198,31 @@ const Register: React.FC = () => {
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.', { id: loadingToast });
       setLoading(false);
     }
+  };
+
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log('Payment successful:', paymentData);
+    setSubmitted(true);
+    setShowPayment(false);
+    
+    // Show user credentials after a delay
+    setTimeout(() => {
+      toast.success(`Registration ID: ${registrationData.id}. Check your email for login credentials.`, {
+        duration: 8000,
+      });
+      navigate('/login');
+    }, 2000);
+  };
+
+  const handlePaymentFailure = (error: any) => {
+    console.error('Payment failed:', error);
+    toast.error('Payment failed. Please try again or contact support.');
+    setShowPayment(false);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    toast.info('Payment cancelled. You can complete payment later from your dashboard.');
   };
 
   const nextStep = async () => {
@@ -923,6 +946,23 @@ const Register: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Payment Gateway Modal */}
+      {showPayment && registrationData && pricing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <PaymentGateway
+              userId={registrationData.userId}
+              registrationId={registrationData.id}
+              amount={watch('isKumaraguru') === 'yes' ? pricing.internalDelegate : pricing.externalDelegate}
+              currency="INR"
+              onSuccess={handlePaymentSuccess}
+              onFailure={handlePaymentFailure}
+              onClose={handlePaymentClose}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

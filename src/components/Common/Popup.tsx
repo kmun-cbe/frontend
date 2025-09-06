@@ -19,13 +19,11 @@ const Popup: React.FC = () => {
     const fetchPopup = async () => {
       try {
         const response = await popupAPI.getActive();
-        console.log('Popup API response:', response);
         
         if (response.success && response.data && response.data.isActive) {
           setPopup(response.data);
           setIsVisible(true);
         } else {
-          console.log('No active popup found');
           setPopup(null);
           setIsVisible(false);
         }
@@ -74,34 +72,34 @@ const Popup: React.FC = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
           >
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md mx-auto">
+            <div className="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-lg mx-auto border border-gray-100">
               {/* Header with X button */}
-              <div className="relative p-6 pb-4">
+              <div className="relative p-8 pb-6">
                 <button
                   onClick={handleClose}
-                  className="absolute top-4 right-4 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="absolute top-6 right-6 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors group"
                 >
-                  <X className="w-4 h-4 text-gray-600" />
+                  <X className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
                 </button>
                 
                 {/* Content */}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                <div className="text-center pr-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 leading-tight">
                     {popup.heading}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed mb-6">
+                  <p className="text-gray-600 leading-relaxed text-lg">
                     {popup.text}
                   </p>
                 </div>
               </div>
               
               {/* Footer with Close button */}
-              <div className="px-6 pb-6">
+              <div className="px-8 pb-8">
                 <button
                   onClick={handleClose}
-                  className="w-full px-4 py-2 bg-[#172d9d] text-white rounded-lg hover:bg-[#0f1a4a] transition-colors font-medium"
+                  className="w-full px-6 py-3 bg-[#172d9d] text-white rounded-lg hover:bg-[#0f1a4a] transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Close
+                  Got it!
                 </button>
               </div>
             </div>
