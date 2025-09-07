@@ -257,7 +257,11 @@ export const usersAPI = {
 // Pricing API
 export const pricingAPI = {
   get: async () => {
-    return authenticatedFetch('/api/pricing');
+    const response = await fetch(`${API_BASE_URL}/api/pricing`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
   },
 
   update: async (data: any) => {
