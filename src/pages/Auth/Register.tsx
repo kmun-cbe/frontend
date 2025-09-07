@@ -228,7 +228,8 @@ const Register: React.FC = () => {
         // Store registration data and show payment gateway
         const registrationWithUserId = {
           ...response.registration,
-          userId: response.user.id
+          userId: response.user.id,
+          customUserId: response.user.userId
         };
         console.log('Setting registration data:', registrationWithUserId);
         console.log('Pricing data:', pricing);
@@ -251,7 +252,7 @@ const Register: React.FC = () => {
     
     // Show user credentials after a delay
     setTimeout(() => {
-      toast.success(`Registration ID: ${registrationData.id}. Check your email for login credentials.`, {
+      toast.success(`Registration successful! Your User ID: ${registrationData.customUserId}. Check your email for login credentials.`, {
         duration: 8000,
       });
       navigate('/login');
