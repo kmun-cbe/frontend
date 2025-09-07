@@ -14,9 +14,9 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { committeesAPI } from '../../services/api';
+import { committeesAPI } from '@/services/api';
 import toast from 'react-hot-toast';
-import { useFormOpenScroll } from '../../hooks/useScrollToTop';
+import { useFormOpenScroll } from '@/hooks/useScrollToTop';
 
 interface Committee {
   id: string;

@@ -11,10 +11,10 @@ import {
   X,
   Upload
 } from 'lucide-react';
-import { galleryAPI } from '../../services/api';
-import { GalleryItem } from '../../types';
+import { galleryAPI } from '@/services/api';
+import { GalleryItem } from '@/types';
 import toast from 'react-hot-toast';
-import { useFormOpenScroll } from '../../hooks/useScrollToTop';
+import { useFormOpenScroll } from '@/hooks/useScrollToTop';
 
 const GalleryManager: React.FC = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);

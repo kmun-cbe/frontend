@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { popupAPI } from '../../services/api';
+import { popupAPI } from '@/services/api';
 
 interface PopupData {
   id: string;

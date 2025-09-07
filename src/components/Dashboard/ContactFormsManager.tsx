@@ -14,7 +14,7 @@ import {
   Filter,
   RefreshCw
 } from 'lucide-react';
-import { contactAPI } from '../../services/api';
+import { contactAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface ContactForm {

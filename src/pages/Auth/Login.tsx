@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/Common/LoadingSpinner';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');

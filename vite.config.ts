@@ -9,29 +9,25 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     base: '/', // Set base path for deployment
+    resolve: {
+      alias: {
+        '@': '/src',
+      },
+    },
     optimizeDeps: {
       exclude: ['lucide-react'],
     },
     build: {
       assetsDir: 'assets',
-      rollupOptions: {
-        output: {
-          assetFileNames: (assetInfo) => {
-            const info = assetInfo.name.split('.');
-            const ext = info[info.length - 1];
-            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-              return `assets/images/[name]-[hash][extname]`;
-            }
-            return `assets/[name]-[hash][extname]`;
-          },
-        },
-      },
+      // Public assets (from public/ folder) are automatically copied to dist root
+      // Only imported assets (like import logo from './logo.png') go to assets/ folder
     },
+    publicDir: 'public',
     server: {
       port: 5173,
       proxy: {
         '/api': {
-          target: env.VITE_API_URL || 'https://backend-7rnp.onrender.com',
+          target: env.VITE_API_URL,
           changeOrigin: true,
           secure: false,
         },

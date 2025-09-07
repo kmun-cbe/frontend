@@ -11,7 +11,7 @@ import {
   Clock,
   Package
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const FrontDeskAdminDashboard: React.FC = () => {

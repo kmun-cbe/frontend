@@ -9,9 +9,8 @@ import {
   Heart,
   MessageSquare
 } from 'lucide-react';
-import { pricingAPI, committeesAPI } from '../services/api';
-import Popup from '../components/Common/Popup';
-import { getImageUrl } from '../utils/images';
+import { pricingAPI, committeesAPI } from '@/services/api';
+import Popup from '@/components/Common/Popup';
 
 interface Pricing {
   internalDelegate: number;
@@ -90,7 +89,7 @@ const Home: React.FC = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src={getImageUrl('dome', '/dome-2.png')} 
+            src="/dome-2.png" 
             alt="Temple Dome" 
             className="absolute right-[-10%] top-0 h-full object-cover"
             onError={(e) => {
@@ -289,7 +288,10 @@ Happy MUNning!
                     onError={(e) => {
                       // Fallback if image doesn't exist
                       e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling.style.display = 'block';
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (nextElement) {
+                        nextElement.style.display = 'block';
+                      }
                     }}
                   />
                   <div 

@@ -1,5 +1,5 @@
 // API service for backend communication
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com').replace(/\/api\/?$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL);
 
 // Helper function to get auth token
 const getAuthToken = () => {

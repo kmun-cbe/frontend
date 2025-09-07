@@ -20,18 +20,17 @@ import {
   CheckCircle,
   Image as ImageIcon
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { dashboardAPI, pricingAPI, popupAPI, committeesAPI, registrationAPI, mailerAPI } from '../../services/api';
+import { dashboardAPI, pricingAPI, popupAPI, committeesAPI, registrationAPI, mailerAPI } from '@/services/api';
 import ContactFormsManager from './ContactFormsManager';
-import { useFormOpenScroll } from '../../hooks/useScrollToTop';
-import Mailer from '../Common/Mailer';
+import { useFormOpenScroll } from '@/hooks/useScrollToTop';
+import Mailer from '@/components/Common/Mailer';
 import TransactionRecords from './TransactionRecords';
 import PortfolioManager from './PortfolioManager';
 import UserManagement from './UserManagement';
 import GalleryManager from './GalleryManager';
 import toast from 'react-hot-toast';
-import { getImageUrl } from '../../utils/images';
 
 interface DashboardStats {
   label: string;
@@ -53,6 +52,9 @@ interface PricingData {
   id: string;
   internalDelegate: number;
   externalDelegate: number;
+  accommodationCharge?: number;
+  earlyBirdDiscount?: number;
+  groupDiscount?: number;
   updatedAt: string;
 }
 
@@ -72,7 +74,10 @@ const PricingManagement: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     internalDelegate: 2500,
-    externalDelegate: 3500
+    externalDelegate: 3500,
+    accommodationCharge: 0,
+    earlyBirdDiscount: 0,
+    groupDiscount: 0
   });
 
   useEffect(() => {
@@ -87,7 +92,10 @@ const PricingManagement: React.FC = () => {
         setPricing(response.data);
         setFormData({
           internalDelegate: response.data.internalDelegate,
-          externalDelegate: response.data.externalDelegate
+          externalDelegate: response.data.externalDelegate,
+          accommodationCharge: response.data.accommodationCharge || 0,
+          earlyBirdDiscount: response.data.earlyBirdDiscount || 0,
+          groupDiscount: response.data.groupDiscount || 0
         });
       }
     } catch (error) {
@@ -127,9 +135,9 @@ const PricingManagement: React.FC = () => {
       setFormData({
         internalDelegate: pricing.internalDelegate,
         externalDelegate: pricing.externalDelegate,
-        accommodationCharge: pricing.accommodationCharge,
-        earlyBirdDiscount: pricing.earlyBirdDiscount,
-        groupDiscount: pricing.groupDiscount
+        accommodationCharge: pricing.accommodationCharge || 0,
+        earlyBirdDiscount: pricing.earlyBirdDiscount || 0,
+        groupDiscount: pricing.groupDiscount || 0
       });
     }
   };
@@ -528,7 +536,7 @@ const RegistrationsManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      toast.error(`Failed to load registrations: ${error.message}`);
+      toast.error(`Failed to load registrations: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -797,6 +805,7 @@ const CommitteeManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     institutionType: '',
+    type: '',
     description: '',
     capacity: '',
     logo: null as File | null
@@ -824,7 +833,7 @@ const CommitteeManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching committees:', error);
-      toast.error(`Failed to load committees: ${error.message}`);
+      toast.error(`Failed to load committees: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -887,6 +896,7 @@ const CommitteeManagement: React.FC = () => {
     setFormData({
       name: committee.name || '',
       institutionType: committee.institutionType || '',
+      type: committee.type || '',
       description: committee.description || '',
       capacity: committee.capacity?.toString() || '',
       logo: null
@@ -900,6 +910,7 @@ const CommitteeManagement: React.FC = () => {
     setFormData({
       name: '',
       institutionType: '',
+      type: '',
       description: '',
       capacity: '',
       logo: null
@@ -1159,7 +1170,7 @@ const DevAdminDashboard: React.FC = () => {
 
   const checkSystemStatus = async () => {
     try {
-              const apiBaseUrl = (import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com').replace(/\/api\/?$/, '');
+              const apiBaseUrl = (import.meta.env.VITE_API_URL);
         
         // Check database connection
         const dbResponse = await fetch(`${apiBaseUrl}/api/health/database`);
@@ -1332,7 +1343,7 @@ const DevAdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
-                <img src={getImageUrl('logo', '/logo.png')} alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
+                <img src="/logo.png" alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Dev Admin Dashboard</h1>
@@ -1599,7 +1610,7 @@ const DevAdminDashboard: React.FC = () => {
                       }
                     } catch (error) {
                       console.error('Error sending email:', error);
-                      toast.error(`Failed to send email: ${error.message}`);
+                      toast.error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
                       throw error;
                     }
                   }}

@@ -16,7 +16,7 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
-import { paymentsAPI } from '../../services/api';
+import { paymentsAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface Payment {

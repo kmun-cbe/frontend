@@ -6,10 +6,9 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
-import { getImageUrl } from '../../utils/images';
+import { authAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface UserProfile {
@@ -210,7 +209,7 @@ const DelegateDashboard: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
                 <img 
-                  src={getImageUrl('logo', '/logo.png')} 
+                  src="/logo.png" 
                   alt="K-MUN 2025 Logo" 
                   className="w-full h-full object-contain"
                   onError={(e) => {

@@ -11,7 +11,7 @@ import {
   MessageSquare,
   CheckCircle
 } from 'lucide-react';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 
 interface ContactForm {
   name: string;

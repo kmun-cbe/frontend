@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { committeesAPI } from '../services/api';
+import { committeesAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface Committee {

@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
-import { useFormStepScroll } from '../../hooks/useScrollToTop';
-import PaymentGateway from '../../components/Common/PaymentGateway';
+import { useFormStepScroll } from '@/hooks/useScrollToTop';
+import PaymentGateway from '@/components/Common/PaymentGateway';
 import { 
   User, 
   Mail, 
@@ -16,8 +16,8 @@ import {
   AlertCircle,
   Copy
 } from 'lucide-react';
-import LoadingSpinner from '../../components/Common/LoadingSpinner';
-import { committeesAPI, pricingAPI } from '../../services/api';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import { committeesAPI, pricingAPI } from '@/services/api';
 
 interface Committee {
   id: string;

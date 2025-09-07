@@ -11,7 +11,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { mailerAPI } from '../../services/api';
+import { mailerAPI } from '@/services/api';
 
 interface MailerProps {
   committees?: Array<{ id: string; name: string }>;

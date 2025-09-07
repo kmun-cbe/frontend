@@ -9,12 +9,12 @@ import {
   LogOut,
   Edit
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ContactFormsManager from './ContactFormsManager';
-import Mailer from '../Common/Mailer';
+import Mailer from '@/components/Common/Mailer';
 import toast from 'react-hot-toast';
-import { mailerAPI, registrationAPI } from '../../services/api';
+import { mailerAPI, registrationAPI } from '@/services/api';
 
 const DelegateAffairsDashboard: React.FC = () => {
   const { logout } = useAuth();

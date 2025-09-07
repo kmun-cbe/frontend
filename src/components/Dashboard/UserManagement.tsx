@@ -21,7 +21,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import { usersAPI } from '../../services/api';
+import { usersAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface User {

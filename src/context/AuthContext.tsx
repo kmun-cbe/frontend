@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { User } from '../types';
+import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -21,7 +21,7 @@ export const useAuth = () => {
 };
 
 // API base URL
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com').replace(/\/api\/?$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL);
 
 // API service functions
 const apiService = {

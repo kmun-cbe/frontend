@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Image as ImageIcon, Video } from 'lucide-react';
-import { galleryAPI } from '../services/api';
-import { GalleryItem } from '../types';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
+import { galleryAPI } from '@/services/api';
+import { GalleryItem } from '@/types';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 const Gallery: React.FC = () => {
