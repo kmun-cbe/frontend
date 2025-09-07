@@ -1,9 +1,10 @@
 // Image utility functions for better asset handling
 
 // Import images as modules for better bundling
-import logoImg from '/logo.png';
-import domeImg from '/dome-2.png';
-import faviconImg from '/favicon.ico';
+// Use public URLs for images
+const logoImg = '/logo.png';
+const domeImg = '/dome-2.png';
+const faviconImg = '/favicon.ico';
 
 // Export image URLs
 export const images = {
