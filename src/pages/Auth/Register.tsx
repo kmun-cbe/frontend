@@ -87,6 +87,8 @@ const Register: React.FC = () => {
   const [pricing, setPricing] = useState<PricingData | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<any>(null);
+  const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(null);
+  const [selectedMunResume, setSelectedMunResume] = useState<File | null>(null);
   const navigate = useNavigate();
 
   const {
@@ -165,6 +167,16 @@ const Register: React.FC = () => {
     return committee ? (committee.portfolios?.filter(p => p.isActive).map(p => p.name) || []) : [];
   };
 
+  const handleIdDocumentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setSelectedIdDocument(file);
+  };
+
+  const handleMunResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setSelectedMunResume(file);
+  };
+
   const onSubmit = async (data: RegistrationForm) => {
     const loadingToast = toast.loading('Submitting registration...');
     setLoading(true);
@@ -208,6 +220,11 @@ const Register: React.FC = () => {
       if (response.success) {
         toast.success('Registration submitted successfully!', { id: loadingToast });
         setLoading(false);
+        
+        // Store the authentication token for payment API calls
+        if (response.token) {
+          localStorage.setItem('munToken', response.token);
+        }
         
         // Store registration data and show payment gateway
         setRegistrationData(response.registration);
@@ -776,22 +793,51 @@ const Register: React.FC = () => {
                   <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
                     <div className="space-y-1 text-center">
                       <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="id-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-blue-800 hover:text-blue-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                        >
-                          <span>Upload a file</span>
-                          <input
-                            id="id-upload"
-                            {...register('idDocument', { required: 'ID document is required' })}
-                            type="file"
-                            accept="image/*,.pdf"
-                            className="sr-only"
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
+                      {selectedIdDocument ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-center space-x-2">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span className="text-sm font-medium text-green-700">
+                              {selectedIdDocument.name}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {(selectedIdDocument.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                          <label
+                            htmlFor="id-upload-change"
+                            className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer underline"
+                          >
+                            Change file
+                            <input
+                              id="id-upload-change"
+                              {...register('idDocument', { required: 'ID document is required' })}
+                              type="file"
+                              accept="image/*,.pdf"
+                              className="sr-only"
+                              onChange={handleIdDocumentChange}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex text-sm text-gray-600">
+                          <label
+                            htmlFor="id-upload"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-blue-800 hover:text-blue-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                          >
+                            <span>Upload a file</span>
+                            <input
+                              id="id-upload"
+                              {...register('idDocument', { required: 'ID document is required' })}
+                              type="file"
+                              accept="image/*,.pdf"
+                              className="sr-only"
+                              onChange={handleIdDocumentChange}
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                      )}
                       <p className="text-xs text-gray-500">
                         PNG, JPG, PDF up to 10MB
                       </p>
@@ -812,22 +858,51 @@ const Register: React.FC = () => {
                   <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
                     <div className="space-y-1 text-center">
                       <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="resume-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-blue-800 hover:text-blue-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                        >
-                          <span>Upload a file</span>
-                          <input
-                            id="resume-upload"
-                            {...register('munResume')}
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            className="sr-only"
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
+                      {selectedMunResume ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-center space-x-2">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span className="text-sm font-medium text-green-700">
+                              {selectedMunResume.name}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {(selectedMunResume.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                          <label
+                            htmlFor="resume-upload-change"
+                            className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer underline"
+                          >
+                            Change file
+                            <input
+                              id="resume-upload-change"
+                              {...register('munResume')}
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              className="sr-only"
+                              onChange={handleMunResumeChange}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex text-sm text-gray-600">
+                          <label
+                            htmlFor="resume-upload"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-blue-800 hover:text-blue-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                          >
+                            <span>Upload a file</span>
+                            <input
+                              id="resume-upload"
+                              {...register('munResume')}
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              className="sr-only"
+                              onChange={handleMunResumeChange}
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                      )}
                       <p className="text-xs text-gray-500">
                         PDF, DOC, DOCX up to 10MB
                       </p>
