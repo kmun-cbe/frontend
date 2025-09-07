@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
-import { useFormStepScroll } from '@/hooks/useScrollToTop';
 import PaymentGateway from '@/components/Common/PaymentGateway';
 import { 
   User, 
@@ -281,8 +280,19 @@ const Register: React.FC = () => {
     setStep(step - 1);
   };
 
-  // Scroll to top when step changes
-  useFormStepScroll(step, '.registration-form-container');
+  // Scroll to top when step changes (only on actual step changes, not on every render)
+  useEffect(() => {
+    // Only scroll if we're not on step 1 (to avoid scrolling on initial load)
+    if (step > 1) {
+      const element = document.querySelector('.registration-form-container');
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }
+  }, [step]); // Only trigger when step changes
 
   if (submitted) {
     return (
