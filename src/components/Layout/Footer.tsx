@@ -16,14 +16,14 @@ const Footer: React.FC = () => {
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/images/logo.png"
+                  src="/logo.png"
                   alt="K-MUN 2025 Logo"
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.fallback) {
                       target.dataset.fallback = 'jpg';
-                      target.src = '/images/logo.jpg';
+                      target.src = '/logo.jpg';
                     } else {
                       target.style.display = 'none';
                       target.nextElementSibling?.classList.remove('hidden');

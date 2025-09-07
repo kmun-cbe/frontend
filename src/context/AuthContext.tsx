@@ -21,7 +21,7 @@ export const useAuth = () => {
 };
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com').replace(/\/api\/?$/, '');
 
 // API service functions
 const apiService = {

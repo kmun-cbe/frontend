@@ -1,10 +1,10 @@
 // Image utility functions for better asset handling
 
 // Import images as modules for better bundling
-// Use correct image paths from /images directory
-const logoImg = '/images/logo.png';
-const domeImg = '/images/dome-2.png';
-const faviconImg = '/images/favicon.ico';
+// Use correct image paths from public directory
+const logoImg = '/logo.png';
+const domeImg = '/dome-2.png';
+const faviconImg = '/favicon.ico';
 
 // Export image URLs
 export const images = {

@@ -1159,7 +1159,7 @@ const DevAdminDashboard: React.FC = () => {
 
   const checkSystemStatus = async () => {
     try {
-              const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
+              const apiBaseUrl = (import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com').replace(/\/api\/?$/, '');
         
         // Check database connection
         const dbResponse = await fetch(`${apiBaseUrl}/api/health/database`);
@@ -1332,7 +1332,7 @@ const DevAdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
-                <img src={getImageUrl('logo', '/images/logo.png')} alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
+                <img src={getImageUrl('logo', '/logo.png')} alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Dev Admin Dashboard</h1>

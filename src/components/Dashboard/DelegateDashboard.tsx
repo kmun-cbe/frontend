@@ -210,7 +210,7 @@ const DelegateDashboard: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
                 <img 
-                  src={getImageUrl('logo', '/images/logo.png')} 
+                  src={getImageUrl('logo', '/logo.png')} 
                   alt="K-MUN 2025 Logo" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
