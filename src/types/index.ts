@@ -62,27 +62,22 @@ export interface Registration {
 export interface Committee {
   id: string;
   name: string;
-  shortName: string;
-  agenda: string;
-  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  description: string;
-  backgroundGuide?: string;
-  logo?: string;
+  description?: string;
+  type: string;
   institutionType: 'school' | 'college' | 'both';
-  directorId?: string;
+  capacity: number;
+  logo?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   portfolios?: Portfolio[];
-  director?: User;
 }
 
 export interface Portfolio {
   id: string;
   committeeId: string;
   name: string;
-  isAllocated: boolean;
-  allocatedTo?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
   committee?: Committee;
@@ -268,4 +263,16 @@ export interface Marks {
   user?: User;
   committee?: Committee;
   event?: Event;
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  type: 'image' | 'video';
+  imageUrl: string;
+  videoUrl?: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

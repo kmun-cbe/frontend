@@ -17,7 +17,8 @@ import {
   Settings,
   Activity,
   UserCheck,
-  CheckCircle
+  CheckCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ import Mailer from '../Common/Mailer';
 import TransactionRecords from './TransactionRecords';
 import PortfolioManager from './PortfolioManager';
 import UserManagement from './UserManagement';
+import GalleryManager from './GalleryManager';
 import toast from 'react-hot-toast';
 import { getImageUrl } from '../../utils/images';
 
@@ -795,12 +797,9 @@ const CommitteeManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     institutionType: '',
-    type: '',
     description: '',
     capacity: '',
-    topics: '',
-    chairs: '',
-    portfolios: ''
+    logo: null as File | null
   });
 
   useEffect(() => {
@@ -835,29 +834,21 @@ const CommitteeManagement: React.FC = () => {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.name || !formData.institutionType || !formData.type || !formData.description || !formData.capacity) {
+    if (!formData.name || !formData.institutionType) {
       toast.error('Please fill in all required fields');
       return;
     }
     
-    if (formData.description.length < 20) {
-      toast.error('Description must be at least 20 characters long');
-      return;
-    }
-    
-    if (parseInt(formData.capacity) < 1) {
-      toast.error('Capacity must be at least 1');
-      return;
-    }
-    
     try {
-      const committeeData = {
-        ...formData,
-        capacity: parseInt(formData.capacity) || 0,
-        topics: formData.topics ? formData.topics.split(',').map(t => t.trim()) : [],
-        chairs: formData.chairs ? formData.chairs.split(',').map(c => c.trim()) : [],
-        portfolios: formData.portfolios ? formData.portfolios.split(',').map(p => p.trim()) : []
-      };
+      const committeeData = new FormData();
+      committeeData.append('name', formData.name);
+      committeeData.append('institutionType', formData.institutionType);
+      committeeData.append('description', formData.description || '');
+      committeeData.append('capacity', formData.capacity || '0');
+      
+      if (formData.logo) {
+        committeeData.append('logo', formData.logo);
+      }
 
       let response;
       if (editingCommittee) {
@@ -881,9 +872,7 @@ const CommitteeManagement: React.FC = () => {
           type: '',
           description: '',
           capacity: '',
-          topics: '',
-          chairs: '',
-          portfolios: ''
+          logo: null
         });
         fetchCommittees();
       }
@@ -898,12 +887,9 @@ const CommitteeManagement: React.FC = () => {
     setFormData({
       name: committee.name || '',
       institutionType: committee.institutionType || '',
-      type: committee.type || '',
       description: committee.description || '',
       capacity: committee.capacity?.toString() || '',
-      topics: committee.topics ? committee.topics.join(', ') : '',
-      chairs: committee.chairs ? committee.chairs.join(', ') : '',
-      portfolios: committee.portfolios ? committee.portfolios.join(', ') : ''
+      logo: null
     });
     setShowAddForm(true);
   };
@@ -914,12 +900,9 @@ const CommitteeManagement: React.FC = () => {
     setFormData({
       name: '',
       institutionType: '',
-      type: '',
       description: '',
       capacity: '',
-      topics: '',
-      chairs: '',
-      portfolios: ''
+      logo: null
     });
   };
 
@@ -989,24 +972,6 @@ const CommitteeManagement: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Committee Type <span className="text-red-600">*</span>
-                </label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({...formData, type: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">Select committee type</option>
-                  <option value="GA">General Assembly (GA)</option>
-                  <option value="SC">Security Council (SC)</option>
-                  <option value="SPECIALIZED">Specialized Agency</option>
-                  <option value="COURT">International Court</option>
-                  <option value="CRISIS">Crisis Committee</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Committee Name <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -1021,74 +986,43 @@ const CommitteeManagement: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-600">*</span>
+                Description
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter committee description (minimum 20 characters)"
+                placeholder="Enter committee description (optional)"
                 rows={3}
-                required
-                minLength={20}
               />
-              {formData.description && formData.description.length < 20 && (
-                <p className="text-red-500 text-sm mt-1">
-                  Description must be at least 20 characters long
-                </p>
-              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Capacity <span className="text-red-600">*</span>
+                  Capacity (Number of Portfolios)
                 </label>
                 <input
                   type="number"
                   value={formData.capacity}
                   onChange={(e) => setFormData({...formData, capacity: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter capacity"
-                  min="1"
-                  required
+                  placeholder="Enter initial capacity"
+                  min="0"
                 />
+                <p className="text-xs text-gray-500 mt-1">This will be automatically updated based on portfolios added</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Topics (comma-separated)
+                  Committee Logo
                 </label>
                 <input
-                  type="text"
-                  value={formData.topics}
-                  onChange={(e) => setFormData({...formData, topics: e.target.value})}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFormData({...formData, logo: e.target.files?.[0] || null})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Topic 1, Topic 2, Topic 3"
                 />
+                <p className="text-xs text-gray-500 mt-1">Upload a logo for this committee (optional)</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chairs (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={formData.chairs}
-                  onChange={(e) => setFormData({...formData, chairs: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Chair 1, Chair 2"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Portfolios (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={formData.portfolios}
-                onChange={(e) => setFormData({...formData, portfolios: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Portfolio 1, Portfolio 2, Portfolio 3"
-              />
             </div>
             <div className="flex justify-end space-x-3">
               <button
@@ -1122,9 +1056,6 @@ const CommitteeManagement: React.FC = () => {
                   Institution Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Committee Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Committee Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1151,11 +1082,6 @@ const CommitteeManagement: React.FC = () => {
                           : 'bg-purple-100 text-purple-800'
                       }`}>
                         {committee.institutionType === 'both' ? 'School & College' : committee.institutionType?.toUpperCase() || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                        {committee.type || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -1365,6 +1291,7 @@ const DevAdminDashboard: React.FC = () => {
     { id: 'registrations', label: 'Registrations', icon: UserPlus },
     { id: 'committees', label: 'Committee Manager', icon: FileText },
     { id: 'portfolios', label: 'Portfolio Manager', icon: Edit },
+    { id: 'gallery', label: 'Gallery Manager', icon: ImageIcon },
     { id: 'pricing', label: 'Pricing', icon: Settings },
     { id: 'popups', label: 'Popup Manager', icon: AlertCircle },
     { id: 'mailer', label: 'Mailer', icon: Mail },
@@ -1701,8 +1628,15 @@ const DevAdminDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* Gallery Manager Tab */}
+            {activeTab === 'gallery' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <GalleryManager />
+              </div>
+            )}
+
             {/* Other tabs content would be implemented here */}
-            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'registrations' && activeTab !== 'contact' && activeTab !== 'mailer' && activeTab !== 'transactions' && activeTab !== 'portfolios' && activeTab !== 'users' && (
+            {activeTab !== 'overview' && activeTab !== 'pricing' && activeTab !== 'popups' && activeTab !== 'committees' && activeTab !== 'registrations' && activeTab !== 'contact' && activeTab !== 'mailer' && activeTab !== 'transactions' && activeTab !== 'portfolios' && activeTab !== 'users' && activeTab !== 'gallery' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {tabs.find(tab => tab.id === activeTab)?.label}

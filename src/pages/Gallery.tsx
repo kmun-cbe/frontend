@@ -1,129 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Play, Image as ImageIcon, Video } from 'lucide-react';
+import { galleryAPI } from '../services/api';
+import { GalleryItem } from '../types';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const Gallery: React.FC = () => {
-  const committees = [
-    {
-      id: 1,
-      name: 'United Nations Security Council',
-      shortName: 'UNSC',
-      image: 'https://images.pexels.com/photos/7648047/pexels-photo-7648047.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'The Security Council has primary responsibility for the maintenance of international peace and security.'
-    },
-    {
-      id: 2,
-      name: 'General Assembly First Committee',
-      shortName: 'GA1',
-      image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Deals with disarmament, global challenges and threats to peace that affect the international community.'
-    },
-    {
-      id: 3,
-      name: 'Economic and Social Council',
-      shortName: 'ECOSOC',
-      image: 'https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Coordinates economic and social work of the UN and its specialized agencies.'
-    },
-    {
-      id: 4,
-      name: 'Human Rights Council',
-      shortName: 'HRC',
-      image: 'https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Responsible for promoting and protecting human rights around the globe.'
-    },
-    {
-      id: 5,
-      name: 'International Court of Justice',
-      shortName: 'ICJ',
-      image: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'The principal judicial organ of the United Nations.'
-    },
-    {
-      id: 6,
-      name: 'World Health Organization',
-      shortName: 'WHO',
-      image: 'https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Directing and coordinating authority on international health within the UN system.'
-    },
-    {
-      id: 7,
-      name: 'General Assembly Second Committee',
-      shortName: 'GA2',
-      image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Economic and Financial Committee dealing with sustainable development and economic cooperation.'
-    },
-    {
-      id: 8,
-      name: 'General Assembly Third Committee',
-      shortName: 'GA3',
-      image: 'https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Social, Humanitarian and Cultural Committee focusing on human rights and social development.'
-    },
-    {
-      id: 9,
-      name: 'General Assembly Fourth Committee',
-      shortName: 'GA4',
-      image: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Special Political and Decolonization Committee addressing political and decolonization issues.'
-    },
-    {
-      id: 10,
-      name: 'General Assembly Fifth Committee',
-      shortName: 'GA5',
-      image: 'https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Administrative and Budgetary Committee dealing with UN budget and administrative matters.'
-    },
-    {
-      id: 11,
-      name: 'General Assembly Sixth Committee',
-      shortName: 'GA6',
-      image: 'https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Legal Committee focusing on international law and legal matters.'
-    },
-    {
-      id: 12,
-      name: 'United Nations Environment Programme',
-      shortName: 'UNEP',
-      image: 'https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?auto=compress&cs=tinysrgb&w=600',
-      description: 'Leading global environmental authority setting the global environmental agenda.'
-    }
-  ];
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
 
-  const conferenceHighlights = [
-    {
-      id: 1,
-      title: 'K-MUN 2024 Opening Ceremony',
-      description: 'Highlights from the grand opening ceremony of Kumaraguru MUN 2024',
-      image: 'https://images.pexels.com/photos/7648047/pexels-photo-7648047.jpeg?auto=compress&cs=tinysrgb&w=600',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-    },
-    {
-      id: 2,
-      title: 'Committee Sessions 2024',
-      description: 'Exclusive footage from various committee sessions and debates',
-      image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=600',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-    },
-    {
-      id: 3,
-      title: 'Award Ceremony 2024',
-      description: 'Celebrating excellence at the K-MUN 2024 award ceremony',
-      image: 'https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=600',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-    },
-    {
-      id: 4,
-      title: 'Cultural Night 2024',
-      description: 'A spectacular evening of cultural performances and celebrations',
-      image: 'https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg?auto=compress&cs=tinysrgb&w=600',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  useEffect(() => {
+    fetchGalleryData();
+  }, []);
+
+  useEffect(() => {
+    fetchGalleryItems();
+  }, [selectedCategory]);
+
+  const fetchGalleryData = async () => {
+    try {
+      setLoading(true);
+      const [itemsResponse, categoriesResponse] = await Promise.all([
+        galleryAPI.getAll(),
+        galleryAPI.getCategories()
+      ]);
+
+      if (itemsResponse.success) {
+        setGalleryItems(itemsResponse.data);
+      }
+
+      if (categoriesResponse.success) {
+        setCategories(categoriesResponse.data);
+      }
+    } catch (error) {
+      console.error('Error fetching gallery data:', error);
+      toast.error('Failed to load gallery data');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const fetchGalleryItems = async () => {
+    try {
+      const category = selectedCategory === 'all' ? undefined : selectedCategory;
+      const response = await galleryAPI.getAll(category);
+      
+      if (response.success) {
+        setGalleryItems(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching gallery items:', error);
+      toast.error('Failed to load gallery items');
+    }
+  };
 
   const handleVideoClick = (videoUrl: string) => {
     window.open(videoUrl, '_blank');
   };
+
+  const filteredItems = selectedCategory === 'all' 
+    ? galleryItems 
+    : galleryItems.filter(item => item.category === selectedCategory);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -144,100 +92,111 @@ const Gallery: React.FC = () => {
         </div>
       </section>
 
-      {/* Committees Grid */}
-      <section className="py-20">
+      {/* Category Filter */}
+      <section className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Some Portraits
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {committees.map((committee, index) => (
-              <motion.div
-                key={committee.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                selectedCategory === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              All
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-2 rounded-full font-medium transition-colors capitalize ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
               >
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={committee.image}
-                    alt={committee.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-lg font-bold">{committee.shortName}</h3>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{committee.name}</h3>
-                  <p className="text-gray-600 text-sm">{committee.description}</p>
-                </div>
-              </motion.div>
+                {category}
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Conference Highlights */}
-      <section className="py-20 bg-gray-50">
+      {/* Gallery Grid */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Highlights
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Relive the memorable moments from previous K-MUN conferences
-            </p>
-          </motion.div>
+          {filteredItems.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-gray-400 mb-4">
+                <ImageIcon className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No items found</h3>
+              <p className="text-gray-600">
+                {selectedCategory === 'all' 
+                  ? 'No gallery items available yet.' 
+                  : `No items found in the "${selectedCategory}" category.`
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {filteredItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                >
+                  <div className="relative aspect-square overflow-hidden">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    
+                    {/* Type Indicator */}
+                    <div className="absolute top-3 right-3">
+                      <div className={`p-2 rounded-full ${
+                        item.type === 'video' 
+                          ? 'bg-red-600 text-white' 
+                          : 'bg-blue-600 text-white'
+                      }`}>
+                        {item.type === 'video' ? (
+                          <Video className="w-4 h-4" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4" />
+                        )}
+                      </div>
+                    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {conferenceHighlights.map((highlight, index) => (
-              <motion.div
-                key={highlight.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={highlight.image}
-                    alt={highlight.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      onClick={() => handleVideoClick(highlight.videoUrl)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 transition-all duration-300 transform hover:scale-110 shadow-lg"
-                    >
-                      <Play className="w-8 h-8" fill="currentColor" />
-                    </button>
+                    {/* Video Play Button Overlay */}
+                    {item.type === 'video' && item.videoUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button
+                          onClick={() => handleVideoClick(item.videoUrl!)}
+                          className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 transition-all duration-300 transform hover:scale-110 shadow-lg"
+                        >
+                          <Play className="w-6 h-6" fill="currentColor" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Title Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <h3 className="text-white font-semibold text-sm line-clamp-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-blue-200 text-xs mt-1 capitalize">
+                        {item.category}
+                      </p>
+                    </div>
                   </div>
-                  
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-xl font-bold mb-2">{highlight.title}</h3>
-                    <p className="text-sm text-blue-200">{highlight.description}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

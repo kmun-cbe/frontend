@@ -22,13 +22,19 @@ import { committeesAPI, pricingAPI } from '../../services/api';
 interface Committee {
   id: string;
   name: string;
-  description: string;
+  description?: string;
+  type: string;
+  institutionType: 'school' | 'college' | 'both';
   capacity: number;
-  registered: number;
-  topics: string[];
-  chairs: string[];
-  portfolios?: string[];
-  image: string;
+  logo?: string;
+  portfolios?: Portfolio[];
+}
+
+interface Portfolio {
+  id: string;
+  name: string;
+  committeeId: string;
+  isActive: boolean;
 }
 
 interface PricingData {
@@ -155,8 +161,8 @@ const Register: React.FC = () => {
 
   const getPortfoliosForCommittee = (committeeName: string) => {
     const committee = committees.find(c => c.name === committeeName);
-    // Return portfolios if available, otherwise return topics as fallback
-    return committee ? (committee.portfolios || committee.topics || []) : [];
+    // Return active portfolios for the committee
+    return committee ? (committee.portfolios?.filter(p => p.isActive).map(p => p.name) || []) : [];
   };
 
   const onSubmit = async (data: RegistrationForm) => {
@@ -670,11 +676,25 @@ const Register: React.FC = () => {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             >
                               <option value="">Select a committee</option>
-                              {committees.map((committee) => (
-                                <option key={committee.name} value={committee.name}>
-                                  {committee.name}
-                                </option>
-                              ))}
+                              {committees
+                                .filter(committee => {
+                                  // For Kumaraguru students, show all committees
+                                  if (isKumaraguru === 'yes') return true;
+                                  
+                                  // For external students, filter by institution type
+                                  if (institutionType === 'school') {
+                                    return committee.institutionType === 'school' || committee.institutionType === 'both';
+                                  } else if (institutionType === 'college') {
+                                    return committee.institutionType === 'college' || committee.institutionType === 'both';
+                                  }
+                                  
+                                  return false;
+                                })
+                                .map((committee) => (
+                                  <option key={committee.name} value={committee.name}>
+                                    {committee.name} ({committee.institutionType === 'both' ? 'School & College' : committee.institutionType})
+                                  </option>
+                                ))}
                             </select>
                             {errors[`committeePreference${num}` as keyof RegistrationForm] && (
                               <p className="mt-1 text-sm text-red-600">

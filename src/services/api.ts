@@ -426,3 +426,51 @@ export const mailerAPI = {
     });
   },
 };
+
+// Gallery API
+export const galleryAPI = {
+  getAll: async (category?: string) => {
+    const url = category ? `/api/gallery?category=${category}` : '/api/gallery';
+    return authenticatedFetch(url);
+  },
+
+  getById: async (id: string) => {
+    return authenticatedFetch(`/api/gallery/${id}`);
+  },
+
+  getCategories: async () => {
+    return authenticatedFetch('/api/gallery/categories');
+  },
+
+  create: async (data: {
+    title: string;
+    type: 'image' | 'video';
+    imageUrl: string;
+    videoUrl?: string;
+    category: string;
+  }) => {
+    return authenticatedFetch('/api/gallery', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  update: async (id: string, data: {
+    title?: string;
+    type?: 'image' | 'video';
+    imageUrl?: string;
+    videoUrl?: string;
+    category?: string;
+  }) => {
+    return authenticatedFetch(`/api/gallery/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  delete: async (id: string) => {
+    return authenticatedFetch(`/api/gallery/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};

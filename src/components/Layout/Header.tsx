@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, User, LogOut } from 'lucide-react';
@@ -10,6 +10,24 @@ const Header: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    if (isProfileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileOpen]);
 
   const handleLogout = () => {
     logout();
@@ -21,6 +39,18 @@ const Header: React.FC = () => {
     if (!user) return '/';
     
     switch (user.role) {
+      case 'DELEGATE':
+        return '/dashboard/delegate';
+      case 'DEV_ADMIN':
+        return '/dashboard/dev-admin';
+      case 'DELEGATE_AFFAIRS':
+        return '/dashboard/delegate-affairs';
+      case 'FRONT_DESK_ADMIN':
+        return '/dashboard/front-desk-admin';
+      case 'COMMITTEE_DIRECTOR':
+        return '/dashboard/committee-director';
+      case 'HOSPITALITY_ADMIN':
+        return '/dashboard/hospitality-admin';
       default:
         return '/';
     }
@@ -86,7 +116,7 @@ const Header: React.FC = () => {
             {/* Auth Section */}
             <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-2 hover:bg-gray-200 transition-colors"
@@ -103,11 +133,12 @@ const Header: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                   >
                     <Link
                       to={getDashboardLink()}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsProfileOpen(false)}
                     >
                       <User className="w-4 h-4 mr-2" />
@@ -115,7 +146,7 @@ const Header: React.FC = () => {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout
@@ -221,12 +252,18 @@ const Header: React.FC = () => {
                   <Link
                     to={getDashboardLink()}
                     className="block text-gray-700 hover:text-primary-900 transition-colors mb-2"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsProfileOpen(false);
+                    }}
                   >
                     Dashboard
                   </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
                     className="block text-gray-700 hover:text-primary-900 transition-colors"
                   >
                     Logout
