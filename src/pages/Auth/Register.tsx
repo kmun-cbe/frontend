@@ -175,16 +175,32 @@ const Register: React.FC = () => {
       // Create FormData for file uploads
       const formData = new FormData();
       
-      // Add all form fields
+      // Add all form fields with proper data transformation
       Object.keys(data).forEach(key => {
         if (key === 'idDocument' && data.idDocument && data.idDocument[0]) {
           formData.append('idDocument', data.idDocument[0]);
         } else if (key === 'munResume' && data.munResume && data.munResume[0]) {
           formData.append('munResume', data.munResume[0]);
         } else if (key !== 'terms' && key !== 'idDocument' && key !== 'munResume') {
-          formData.append(key, data[key as keyof RegistrationForm] as string);
+          let value = data[key as keyof RegistrationForm] as string;
+          
+          // Transform gender to uppercase for backend validation
+          if (key === 'gender') {
+            value = value.toUpperCase();
+          }
+          
+          // Ensure value is not undefined or null
+          if (value !== undefined && value !== null) {
+            formData.append(key, value);
+          }
         }
       });
+      
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
       
       // Call the registration API
       const response = await registrationAPI.create(formData);
