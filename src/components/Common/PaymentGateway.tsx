@@ -57,6 +57,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   }, []);
 
   const handlePayment = async () => {
+    console.log('Payment button clicked');
+    console.log('Razorpay loaded:', razorpayLoaded);
+    console.log('Payment data:', { userId, registrationId, amount, currency });
+    
     if (!razorpayLoaded) {
       toast.error('Payment gateway is still loading. Please try again.');
       return;
@@ -169,6 +173,7 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
 
       <div className="space-y-3">
         <button
+          type="button"
           onClick={handlePayment}
           disabled={loading || !razorpayLoaded}
           className="w-full bg-[#172d9d] text-white py-3 px-4 rounded-lg hover:bg-[#1a2a8a] focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -185,6 +190,7 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
 
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
             className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
           >
