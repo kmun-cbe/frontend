@@ -1,3 +1,0 @@
-# Serve index.html for SPA routes (exclude static assets)
-# This pattern excludes files with extensions and the assets folder
-/!(assets|*.png|*.jpg|*.jpeg|*.gif|*.svg|*.ico|*.webp|*.css|*.js)    /index.html   200
