@@ -852,6 +852,7 @@ const CommitteeManagement: React.FC = () => {
       const committeeData = new FormData();
       committeeData.append('name', formData.name);
       committeeData.append('institutionType', formData.institutionType);
+      committeeData.append('type', formData.type || 'GENERAL');
       committeeData.append('description', formData.description || '');
       committeeData.append('capacity', formData.capacity || '0');
       
