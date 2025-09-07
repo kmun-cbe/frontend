@@ -17,6 +17,7 @@ import {
 import { committeesAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 import { useFormOpenScroll } from '@/hooks/useScrollToTop';
+import { useAuth } from '@/context/AuthContext';
 
 interface Committee {
   id: string;
@@ -37,6 +38,7 @@ interface Portfolio {
 }
 
 const PortfolioManager: React.FC = () => {
+  const { user } = useAuth();
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(null);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
@@ -119,8 +121,24 @@ const PortfolioManager: React.FC = () => {
       return;
     }
 
+    // Check if user has permission to add portfolios
+    if (user?.role !== 'DEV_ADMIN') {
+      toast.error('You do not have permission to add portfolios. Only Dev Admins can perform this action.');
+      return;
+    }
+
     if (!formData.name.trim()) {
       toast.error('Please enter a portfolio name');
+      return;
+    }
+
+    if (formData.name.trim().length < 3) {
+      toast.error('Portfolio name must be at least 3 characters long');
+      return;
+    }
+
+    if (formData.name.trim().length > 100) {
+      toast.error('Portfolio name must be less than 100 characters');
       return;
     }
 
@@ -139,7 +157,8 @@ const PortfolioManager: React.FC = () => {
       }
     } catch (error) {
       console.error('Error adding portfolio:', error);
-      toast.error('Failed to add portfolio');
+      const errorMessage = error.message || 'Failed to add portfolio';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -153,8 +172,24 @@ const PortfolioManager: React.FC = () => {
       return;
     }
 
+    // Check if user has permission to update portfolios
+    if (user?.role !== 'DEV_ADMIN') {
+      toast.error('You do not have permission to update portfolios. Only Dev Admins can perform this action.');
+      return;
+    }
+
     if (!formData.name.trim()) {
       toast.error('Please enter a portfolio name');
+      return;
+    }
+
+    if (formData.name.trim().length < 3) {
+      toast.error('Portfolio name must be at least 3 characters long');
+      return;
+    }
+
+    if (formData.name.trim().length > 100) {
+      toast.error('Portfolio name must be less than 100 characters');
       return;
     }
 
@@ -177,7 +212,8 @@ const PortfolioManager: React.FC = () => {
       }
     } catch (error) {
       console.error('Error updating portfolio:', error);
-      toast.error('Failed to update portfolio');
+      const errorMessage = error.message || 'Failed to update portfolio';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -186,6 +222,12 @@ const PortfolioManager: React.FC = () => {
   const handleDeletePortfolio = async (portfolioId: string) => {
     if (!selectedCommittee) {
       toast.error('No committee selected');
+      return;
+    }
+
+    // Check if user has permission to delete portfolios
+    if (user?.role !== 'DEV_ADMIN') {
+      toast.error('You do not have permission to delete portfolios. Only Dev Admins can perform this action.');
       return;
     }
 
