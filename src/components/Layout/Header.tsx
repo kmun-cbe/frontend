@@ -64,7 +64,7 @@ const Header: React.FC = () => {
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
               <img
-                src={getImageUrl('logo', '/logo.png')}
+                src={getImageUrl('logo', '/images/logo.png')}
                 alt="K-MUN 2025 Logo"
                 className="w-full h-full object-contain"
                 onError={(e) => {
