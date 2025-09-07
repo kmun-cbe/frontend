@@ -298,7 +298,7 @@ const Register: React.FC = () => {
         >
           <div className="flex justify-center mb-4">
             <div className="w-12 h-12 rounded-xl overflow-hidden bg-white">
-              <img src="/logo.png" alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
+              <img src="/images/logo.png" alt="K-MUN 2025 Logo" className="w-full h-full object-contain" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">

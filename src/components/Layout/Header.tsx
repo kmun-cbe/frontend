@@ -71,7 +71,7 @@ const Header: React.FC = () => {
                   const target = e.target as HTMLImageElement;
                   if (!target.dataset.fallback) {
                     target.dataset.fallback = 'jpg';
-                    target.src = '/logo.jpg';
+                    target.src = '/images/logo.jpg';
                   } else {
                     target.style.display = 'none';
                     target.nextElementSibling?.classList.remove('hidden');

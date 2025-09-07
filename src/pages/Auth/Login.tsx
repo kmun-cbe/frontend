@@ -57,7 +57,7 @@ const Login: React.FC = () => {
             <div className="flex justify-center">
               <div className="w-12 h-12 rounded-xl overflow-hidden bg-white">
                 <img
-                  src="/logo.png"
+                  src="/images/logo.png"
                   alt="K-MUN 2025 Logo"
                   className="w-full h-full object-contain"
                 />

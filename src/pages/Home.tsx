@@ -90,7 +90,7 @@ const Home: React.FC = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src={getImageUrl('dome', '/dome-2.png')} 
+            src={getImageUrl('dome', '/images/dome-2.png')} 
             alt="Temple Dome" 
             className="absolute right-[-10%] top-0 h-full object-cover"
             onError={(e) => {
@@ -283,7 +283,7 @@ Happy MUNning!
               <div className="bg-gray-50 flex items-center justify-center p-8 lg:p-12">
                 <div className="relative">
                   <img 
-                    src="/logo.png" 
+                    src="/images/logo.png" 
                     alt="Secretariat pic" 
                     className="w-full max-w-sm h-auto rounded-lg shadow-lg object-cover"
                     onError={(e) => {

@@ -1,5 +1,5 @@
 // API service for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-7rnp.onrender.com';
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -370,11 +370,7 @@ export const popupAPI = {
     return authenticatedFetch('/api/popups');
   },
   getActive: async () => {
-    const response = await fetch('/api/popups/active');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
+    return authenticatedFetch('/api/popups/active');
   },
   update: async (data: any) => {
     return authenticatedFetch('/api/popups', {
