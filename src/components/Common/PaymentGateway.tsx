@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 interface PaymentGatewayProps {
   userId: string;
   registrationId?: string;
+  customUserId?: string;
   amount: number;
   currency?: string;
   onSuccess?: (paymentData: any) => void;
@@ -21,6 +22,7 @@ declare global {
 const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   userId,
   registrationId,
+  customUserId,
   amount,
   currency = 'INR',
   onSuccess,
@@ -120,7 +122,8 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         },
         notes: {
           registrationId: registrationId || '',
-          userId: userId
+          userId: userId,
+          customUserId: customUserId || ''
         },
         theme: {
           color: '#172d9d'
@@ -163,10 +166,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
           <span className="font-semibold text-gray-900">{currency}</span>
         </div>
 
-        {registrationId && (
+        {customUserId && (
           <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Registration ID</span>
-            <span className="font-semibold text-gray-900">{registrationId}</span>
+            <span className="text-gray-700">User ID</span>
+            <span className="font-semibold text-gray-900">{customUserId}</span>
           </div>
         )}
       </div>

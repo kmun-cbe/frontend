@@ -927,39 +927,6 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Pricing Summary */}
-                {pricing && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-4">
-                    <h4 className="text-lg font-semibold text-blue-900 mb-4">Registration Fees</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-white p-4 rounded-lg border border-blue-200">
-                        <h5 className="font-medium text-blue-900 mb-2">Kumaraguru Delegate</h5>
-                        <p className="text-2xl font-bold text-blue-600">₹{pricing.internalDelegate}</p>
-                        <p className="text-sm text-gray-600">Kumaraguru students</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-blue-200">
-                        <h5 className="font-medium text-blue-900 mb-2">External Delegate</h5>
-                        <p className="text-2xl font-bold text-blue-600">₹{pricing.externalDelegate}</p>
-                        <p className="text-sm text-gray-600">Other institutions</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-blue-200">
-                        <h5 className="font-medium text-blue-900 mb-2">Accommodation</h5>
-                        <p className="text-2xl font-bold text-blue-600">₹{pricing.accommodationCharge}</p>
-                        <p className="text-sm text-gray-600">Optional 3-night stay</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-blue-200">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Early Bird Discount:</span>
-                        <span className="font-medium text-green-600">₹{pricing.earlyBirdDiscount}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Group Discount:</span>
-                        <span className="font-medium text-green-600">₹{pricing.groupDiscount} per person</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex">
@@ -1090,6 +1057,7 @@ const Register: React.FC = () => {
             <PaymentGateway
               userId={registrationData.userId}
               registrationId={registrationData.id}
+              customUserId={registrationData.customUserId}
               amount={watch('isKumaraguru') === 'yes' ? pricing?.internalDelegate || 0 : pricing?.externalDelegate || 0}
               currency="INR"
               onSuccess={handlePaymentSuccess}
