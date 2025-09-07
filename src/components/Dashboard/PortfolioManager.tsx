@@ -150,7 +150,26 @@ const PortfolioManager: React.FC = () => {
 
       if (response.success) {
         toast.success('Portfolio added successfully');
-        fetchCommittees(); // Refresh to get updated data
+        
+        // Update local state immediately for real-time UI update
+        const newPortfolio = response.data;
+        console.log('New portfolio added:', newPortfolio);
+        if (newPortfolio && selectedCommittee) {
+          const updatedPortfolios = [...portfolios, newPortfolio];
+          console.log('Updated portfolios:', updatedPortfolios);
+          setPortfolios(updatedPortfolios);
+          
+          // Update the selected committee in the committees array
+          const updatedCommittees = committees.map(committee => 
+            committee.id === selectedCommittee.id 
+              ? { ...committee, portfolios: updatedPortfolios }
+              : committee
+          );
+          setCommittees(updatedCommittees);
+          setSelectedCommittee({ ...selectedCommittee, portfolios: updatedPortfolios });
+          console.log('Updated selected committee:', { ...selectedCommittee, portfolios: updatedPortfolios });
+        }
+        
         resetForm();
       } else {
         throw new Error(response.message || 'Failed to add portfolio');
@@ -205,7 +224,27 @@ const PortfolioManager: React.FC = () => {
 
       if (response.success) {
         toast.success('Portfolio updated successfully');
-        fetchCommittees(); // Refresh to get updated data
+        
+        // Update local state immediately for real-time UI update
+        const updatedPortfolio = response.data;
+        if (updatedPortfolio && selectedCommittee) {
+          const updatedPortfolios = portfolios.map(portfolio => 
+            portfolio.id === editingPortfolio.id 
+              ? { ...portfolio, name: updatedPortfolio.name }
+              : portfolio
+          );
+          setPortfolios(updatedPortfolios);
+          
+          // Update the selected committee in the committees array
+          const updatedCommittees = committees.map(committee => 
+            committee.id === selectedCommittee.id 
+              ? { ...committee, portfolios: updatedPortfolios }
+              : committee
+          );
+          setCommittees(updatedCommittees);
+          setSelectedCommittee({ ...selectedCommittee, portfolios: updatedPortfolios });
+        }
+        
         resetForm();
       } else {
         throw new Error(response.message || 'Failed to update portfolio');
@@ -241,7 +280,21 @@ const PortfolioManager: React.FC = () => {
 
       if (response.success) {
         toast.success('Portfolio deleted successfully');
-        fetchCommittees(); // Refresh to get updated data
+        
+        // Update local state immediately for real-time UI update
+        if (selectedCommittee) {
+          const updatedPortfolios = portfolios.filter(portfolio => portfolio.id !== portfolioId);
+          setPortfolios(updatedPortfolios);
+          
+          // Update the selected committee in the committees array
+          const updatedCommittees = committees.map(committee => 
+            committee.id === selectedCommittee.id 
+              ? { ...committee, portfolios: updatedPortfolios }
+              : committee
+          );
+          setCommittees(updatedCommittees);
+          setSelectedCommittee({ ...selectedCommittee, portfolios: updatedPortfolios });
+        }
       }
     } catch (error) {
       console.error('Error deleting portfolio:', error);
