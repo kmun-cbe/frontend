@@ -17,7 +17,7 @@ import {
   Copy
 } from 'lucide-react';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { committeesAPI, pricingAPI } from '@/services/api';
+import { committeesAPI, pricingAPI, registrationAPI } from '@/services/api';
 
 interface Committee {
   id: string;
@@ -228,7 +228,7 @@ const Register: React.FC = () => {
 
   const handlePaymentClose = () => {
     setShowPayment(false);
-    toast.info('Payment cancelled. You can complete payment later from your dashboard.');
+    toast('Payment cancelled. You can complete payment later from your dashboard.');
   };
 
   const nextStep = async () => {
@@ -719,7 +719,7 @@ const Register: React.FC = () => {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             >
                               <option value="">Select a portfolio</option>
-                              {getPortfoliosForCommittee(watch(`committeePreference${num}` as keyof RegistrationForm) || '').map((portfolio) => (
+                              {getPortfoliosForCommittee(String(watch(`committeePreference${num}` as keyof RegistrationForm) || '')).map((portfolio) => (
                                 <option key={portfolio} value={portfolio}>
                                   {portfolio}
                                 </option>
