@@ -96,6 +96,10 @@ export const registrationAPI = {
     return authenticatedFetch(`/api/registrations/${id}`);
   },
 
+  getMyRegistration: async () => {
+    return authenticatedFetch('/api/registrations/my-registration');
+  },
+
   update: async (id: string, data: any) => {
     return authenticatedFetch(`/api/registrations/${id}`, {
       method: 'PUT',

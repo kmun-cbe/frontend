@@ -6,7 +6,7 @@ const PrivacyPolicy: React.FC = () => {
       <article className="prose prose-lg max-w-3xl w-full text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
         <div className="text-left space-y-6">
-          <p className="text-gray-700 leading-8">
+        <p className="text-gray-700 leading-8">
             Kumaraguru Model United Nations (KMUN) values the privacy and security of all participants, delegates, chairs, and volunteers. By registering or participating in KMUN, you agree to the following guidelines:
           </p>
           

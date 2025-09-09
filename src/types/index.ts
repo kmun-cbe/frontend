@@ -196,21 +196,6 @@ export interface ContactSubmission {
   submittedAt: string;
 }
 
-export interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  type: 'INFO' | 'WARNING' | 'SUCCESS' | 'ERROR';
-  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
-  targetAudience: 'ALL' | 'ROLE_SPECIFIC' | 'SPECIFIC_USERS';
-  targetRoles?: UserRole[];
-  specificUsers?: string[];
-  sentBy: string;
-  sentAt: string;
-  expiresAt?: string;
-  isRead?: boolean;
-  readAt?: string;
-}
 
 export interface PricingConfig {
   id: string;

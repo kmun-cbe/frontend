@@ -3,7 +3,6 @@ import {
   Users, 
   Search, 
   Mail,
-  Bell,
   MessageSquare,
   UserCheck,
   LogOut,
@@ -31,7 +30,6 @@ const DelegateAffairsDashboard: React.FC = () => {
     { id: 'allocation', label: 'Committee Allocation', icon: UserCheck },
     { id: 'mailer', label: 'Mailer', icon: Mail },
     { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
   const [registrations, setRegistrations] = useState<any[]>([]);

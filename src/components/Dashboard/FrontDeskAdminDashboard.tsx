@@ -4,7 +4,6 @@ import {
   Search, 
   UserCheck,
   UserX,
-  Bell,
   LogOut,
   User,
   CheckCircle,
@@ -39,7 +38,6 @@ const FrontDeskAdminDashboard: React.FC = () => {
   const tabs = [
     { id: 'checkin', label: 'Check In/Out', icon: UserCheck },
     { id: 'userinfo', label: 'User Info', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
   const participants = [
@@ -345,37 +343,6 @@ const FrontDeskAdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'notifications' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Notifications</h3>
-                
-                <div className="space-y-4">
-                  <div className="border-l-4 border-blue-500 bg-blue-50 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-blue-900">System Update</h4>
-                        <p className="text-blue-800 text-sm mt-1">
-                          Check-in system has been updated with new features.
-                        </p>
-                      </div>
-                      <span className="text-xs text-blue-600">1 hour ago</span>
-                    </div>
-                  </div>
-                  
-                  <div className="border-l-4 border-green-500 bg-green-50 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-green-900">Registration Complete</h4>
-                        <p className="text-green-800 text-sm mt-1">
-                          All participants have been registered successfully.
-                        </p>
-                      </div>
-                      <span className="text-xs text-green-600">2 hours ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

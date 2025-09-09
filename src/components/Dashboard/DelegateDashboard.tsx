@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, 
-  Bell, 
   LogOut,
   Calendar,
   Clock
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '@/services/api';
+import { authAPI, registrationAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface UserProfile {
@@ -42,14 +41,6 @@ interface UserProfile {
   lastLogin?: string;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'success' | 'error';
-  createdAt: string;
-  isRead: boolean;
-}
 
 interface Event {
   id: string;
@@ -66,7 +57,6 @@ const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +68,6 @@ const DelegateDashboard: React.FC = () => {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'registration', label: 'Registration Details', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'events', label: 'Event Schedule', icon: Calendar }
   ];
 
@@ -89,29 +78,82 @@ const DelegateDashboard: React.FC = () => {
         
         // Fetch user profile data
         const profileResponse = await authAPI.getProfile();
+        let profileData = null;
+        
         if (profileResponse.success) {
-          setUserProfile(profileResponse.data);
+          const userData = profileResponse.data;
+          
+          // Get the latest registration form data
+          const latestRegistration = userData.registrationForms && userData.registrationForms.length > 0 
+            ? userData.registrationForms[userData.registrationForms.length - 1] 
+            : null;
+          
+          // Merge user data with registration data
+          profileData = {
+            ...userData,
+            ...latestRegistration,
+            // Map registration form fields to profile fields
+            committeePreference1: latestRegistration?.committeePreference1,
+            committeePreference2: latestRegistration?.committeePreference2,
+            committeePreference3: latestRegistration?.committeePreference3,
+            portfolioPreference1: latestRegistration?.portfolioPreference1,
+            portfolioPreference2: latestRegistration?.portfolioPreference2,
+            portfolioPreference3: latestRegistration?.portfolioPreference3,
+            registrationStatus: latestRegistration?.status,
+            allocatedCommittee: latestRegistration?.allocatedCommittee,
+            allocatedPortfolio: latestRegistration?.allocatedPortfolio,
+            institution: latestRegistration?.institution,
+            cityOfInstitution: latestRegistration?.cityOfInstitution,
+            stateOfInstitution: latestRegistration?.stateOfInstitution,
+            grade: latestRegistration?.grade,
+            totalMuns: latestRegistration?.totalMuns,
+            requiresAccommodation: latestRegistration?.requiresAccommodation,
+            gender: latestRegistration?.gender,
+            isKumaraguru: latestRegistration?.isKumaraguru,
+            rollNumber: latestRegistration?.rollNumber,
+            institutionType: latestRegistration?.institutionType,
+          };
         }
 
-        // Mock notifications data (replace with actual API call)
-        setNotifications([
-          {
-            id: '1',
-            title: 'Welcome to K-MUN 2025!',
-            message: 'Thank you for registering. Please complete your payment to secure your spot.',
-            type: 'info',
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            isRead: false
-          },
-          {
-            id: '2',
-            title: 'Payment Reminder',
-            message: 'Please complete your registration payment within 48 hours.',
-            type: 'warning',
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            isRead: false
+        // If no registration data from profile, try to fetch it separately
+        if (!profileData || !profileData.registrationStatus) {
+          try {
+            const registrationResponse = await registrationAPI.getMyRegistration();
+            if (registrationResponse.success && registrationResponse.registration) {
+              const registration = registrationResponse.registration;
+              profileData = {
+                ...profileData,
+                ...registration,
+                committeePreference1: registration.committeePreference1,
+                committeePreference2: registration.committeePreference2,
+                committeePreference3: registration.committeePreference3,
+                portfolioPreference1: registration.portfolioPreference1,
+                portfolioPreference2: registration.portfolioPreference2,
+                portfolioPreference3: registration.portfolioPreference3,
+                registrationStatus: registration.status,
+                allocatedCommittee: registration.allocatedCommittee,
+                allocatedPortfolio: registration.allocatedPortfolio,
+                institution: registration.institution,
+                cityOfInstitution: registration.cityOfInstitution,
+                stateOfInstitution: registration.stateOfInstitution,
+                grade: registration.grade,
+                totalMuns: registration.totalMuns,
+                requiresAccommodation: registration.requiresAccommodation,
+                gender: registration.gender,
+                isKumaraguru: registration.isKumaraguru,
+                rollNumber: registration.rollNumber,
+                institutionType: registration.institutionType,
+              };
+            }
+          } catch (regError) {
+            console.log('No separate registration data found:', regError);
           }
-        ]);
+        }
+
+        if (profileData) {
+          setUserProfile(profileData);
+        }
+
 
         // Mock events data (replace with actual API call)
         setEvents([
@@ -179,15 +221,6 @@ const DelegateDashboard: React.FC = () => {
     }
   };
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'info': return 'border-blue-500 bg-blue-50';
-      case 'warning': return 'border-yellow-500 bg-yellow-50';
-      case 'success': return 'border-green-500 bg-green-50';
-      case 'error': return 'border-red-500 bg-red-50';
-      default: return 'border-gray-500 bg-gray-50';
-    }
-  };
 
   if (loading) {
     return (
@@ -570,53 +603,6 @@ const DelegateDashboard: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'notifications' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Notifications</h3>
-                
-                {notifications.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No notifications available</p>
-                  </div>
-                ) : (
-                <div className="space-y-4">
-                    {notifications.map((notification) => (
-                      <div key={notification.id} className={`border-l-4 p-4 ${getNotificationColor(notification.type)}`}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                            <h4 className={`font-medium ${
-                              notification.type === 'info' ? 'text-blue-900' :
-                              notification.type === 'warning' ? 'text-yellow-900' :
-                              notification.type === 'success' ? 'text-green-900' :
-                              notification.type === 'error' ? 'text-red-900' : 'text-gray-900'
-                            }`}>
-                              {notification.title}
-                            </h4>
-                            <p className={`text-sm mt-1 ${
-                              notification.type === 'info' ? 'text-blue-800' :
-                              notification.type === 'warning' ? 'text-yellow-800' :
-                              notification.type === 'success' ? 'text-green-800' :
-                              notification.type === 'error' ? 'text-red-800' : 'text-gray-800'
-                            }`}>
-                              {notification.message}
-                            </p>
-                          </div>
-                          <span className={`text-xs ${
-                            notification.type === 'info' ? 'text-blue-600' :
-                            notification.type === 'warning' ? 'text-yellow-600' :
-                            notification.type === 'success' ? 'text-green-600' :
-                            notification.type === 'error' ? 'text-red-600' : 'text-gray-600'
-                          }`}>
-                            {formatTime(notification.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                    </div>
-            )}
 
             {activeTab === 'events' && (
               <div className="bg-white rounded-lg shadow-sm p-6">

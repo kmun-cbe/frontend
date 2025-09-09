@@ -3,7 +3,6 @@ import {
   Users, 
   UserCheck,
   Upload,
-  Bell,
   LogOut,
   Clock,
   CheckCircle
@@ -25,7 +24,6 @@ const CommitteeDirectorDashboard: React.FC = () => {
     { id: 'attendance', label: 'Mark Attendance', icon: UserCheck },
     { id: 'view-attendance', label: 'View Attendance', icon: Users },
     { id: 'upload-marks', label: 'Upload Marks', icon: Upload },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
   const committeeMembers = [
@@ -336,37 +334,6 @@ const CommitteeDirectorDashboard: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'notifications' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Notifications</h3>
-                
-                <div className="space-y-4">
-                  <div className="border-l-4 border-indigo-500 bg-indigo-50 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-indigo-900">Session Starting Soon</h4>
-                        <p className="text-indigo-800 text-sm mt-1">
-                          Committee Session II will begin in 15 minutes.
-                        </p>
-                      </div>
-                      <span className="text-xs text-indigo-600">5 min ago</span>
-                    </div>
-                  </div>
-                  
-                  <div className="border-l-4 border-green-500 bg-green-50 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-green-900">Attendance Submitted</h4>
-                        <p className="text-green-800 text-sm mt-1">
-                          Session I attendance has been successfully recorded.
-                        </p>
-                      </div>
-                      <span className="text-xs text-green-600">2 hours ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

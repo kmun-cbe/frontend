@@ -11,7 +11,6 @@ import {
   AlertCircle,
   LogOut,
   UserPlus,
-  Bell,
   MessageSquare,
   Edit,
   Settings,
@@ -1486,7 +1485,6 @@ const DevAdminDashboard: React.FC = () => {
     { id: 'events', label: 'Attendance Events', icon: Calendar },
     { id: 'attendance', label: 'Attendance', icon: UserCheck },
     { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'logs', label: 'Admin Logs', icon: Activity }
   ];
 
@@ -1620,14 +1618,6 @@ const DevAdminDashboard: React.FC = () => {
                        <UserPlus className="w-6 h-6 text-[#172d9d] mb-2" />
                        <h4 className="font-medium text-gray-900">Add New User</h4>
                        <p className="text-sm text-gray-600">Create admin or delegate account</p>
-                     </button>
-                     <button 
-                       onClick={() => setActiveTab('notifications')}
-                       className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                     >
-                       <Bell className="w-6 h-6 text-purple-600 mb-2" />
-                       <h4 className="font-medium text-gray-900">Send Notification</h4>
-                       <p className="text-sm text-gray-600">Broadcast message to users</p>
                      </button>
                    </div>
                  </div>

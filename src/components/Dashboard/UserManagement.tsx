@@ -61,7 +61,7 @@ const UserManagement: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState<UserFormData>({
@@ -242,7 +242,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to deactivate this user? They will be blocked from accessing the system.')) {
       return;
     }
 
@@ -251,14 +251,14 @@ const UserManagement: React.FC = () => {
       const response = await usersAPI.delete(userId);
 
       if (response.success) {
-        toast.success('User deleted successfully');
+        toast.success('User deactivated successfully');
         fetchUsers();
       } else {
-        throw new Error(response.message || 'Failed to delete user');
+        throw new Error(response.message || 'Failed to deactivate user');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
-      toast.error(`Failed to delete user: ${error.message}`);
+      console.error('Error deactivating user:', error);
+      toast.error(`Failed to deactivate user: ${error.message}`);
     } finally {
       setSaving(false);
     }
@@ -607,10 +607,10 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-900 transition-colors flex items-center"
-                        title="Delete user"
+                        title="Deactivate user"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
+                        Deactivate
                       </button>
                     </div>
                   </td>
