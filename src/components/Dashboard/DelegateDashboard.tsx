@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, registrationAPI } from '@/services/api';
+import CompletePaymentButton from '@/components/Common/CompletePaymentButton';
 import toast from 'react-hot-toast';
 
 interface UserProfile {
@@ -19,6 +20,7 @@ interface UserProfile {
   institution?: string;
   grade?: string;
   userId?: string;
+  registrationId?: string;
   committeePreference1?: string;
   committeePreference2?: string;
   committeePreference3?: string;
@@ -53,7 +55,7 @@ interface Event {
 }
 
 const DelegateDashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -71,8 +73,7 @@ const DelegateDashboard: React.FC = () => {
     { id: 'events', label: 'Event Schedule', icon: Calendar }
   ];
 
-  useEffect(() => {
-    const fetchUserData = async () => {
+  const fetchUserData = async () => {
       try {
         setLoading(true);
         
@@ -194,6 +195,7 @@ const DelegateDashboard: React.FC = () => {
       }
     };
 
+  useEffect(() => {
     fetchUserData();
   }, []);
 
@@ -205,12 +207,6 @@ const DelegateDashboard: React.FC = () => {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -247,7 +243,10 @@ const DelegateDashboard: React.FC = () => {
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                    const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (nextElement) {
+                      nextElement.style.display = 'flex';
+                    }
                   }}
                 />
                 <div className="w-full h-full bg-gradient-to-r from-[#172d9d] to-[#797dfa] rounded-full flex items-center justify-center hidden">
@@ -419,6 +418,45 @@ const DelegateDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Payment Section */}
+                {userProfile?.paymentStatus === 'PENDING' && (
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Complete Your Payment</h3>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <Clock className="h-5 w-5 text-yellow-400" />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-yellow-800">
+                            Your registration is pending payment. Complete your payment to confirm your participation in Kumaraguru MUN 2025.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {userProfile && (
+                      <CompletePaymentButton
+                        userId={userProfile.id}
+                        registrationId={userProfile.registrationId || userProfile.id} // Use registration ID if available, fallback to user ID
+                        customUserId={userProfile.userId || 'N/A'}
+                        isKumaraguru={userProfile.isKumaraguru || false}
+                        onPaymentSuccess={(paymentData) => {
+                          console.log('Payment successful:', paymentData);
+                          toast.success('Payment completed successfully!');
+                          // Refresh user data
+                          fetchUserData();
+                        }}
+                        onPaymentFailure={(error) => {
+                          console.error('Payment failed:', error);
+                          toast.error('Payment failed. Please try again.');
+                        }}
+                        className="max-w-md mx-auto"
+                      />
+                    )}
+                  </div>
+                )}
 
                 {/* Committee Allocation */}
                 {(userProfile?.allocatedCommittee || userProfile?.allocatedPortfolio) && (
