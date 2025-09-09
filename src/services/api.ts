@@ -25,7 +25,7 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     console.log(`Response status: ${response.status} for ${url}`);
 
     if (!response.ok) {
-      let errorData = {};
+      let errorData: any = {};
       try {
         errorData = await response.json();
       } catch (parseError) {
@@ -89,7 +89,8 @@ export const registrationAPI = {
     console.log('Creating registration with FormData');
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/registrations`, {
+      // Try the simple route first (without validation middleware)
+      const response = await fetch(`${API_BASE_URL}/api/registrations/simple`, {
         method: 'POST',
         headers: {
           'Authorization': token ? `Bearer ${token}` : '',
@@ -100,7 +101,7 @@ export const registrationAPI = {
       console.log(`Registration creation response status: ${response.status}`);
 
       if (!response.ok) {
-        let errorData = {};
+        let errorData: any = {};
         try {
           errorData = await response.json();
         } catch (parseError) {

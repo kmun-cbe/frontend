@@ -98,14 +98,6 @@ const Header: React.FC = () => {
                 Committees
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link to="/resources" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
-                Resources
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link to="/gallery" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
-                Gallery
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
               <Link to="/contact" className="group relative text-gray-700 hover:text-primary-900 transition-colors">
                 Contact
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-900 transition-all duration-300 group-hover:w-full"></span>
