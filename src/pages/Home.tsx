@@ -119,7 +119,7 @@ const Home: React.FC = () => {
               </p>
               
               <p className="text-base md:text-lg mb-8 leading-relaxed text-gray-200 max-w-lg">
-                Kumaraguru Model United Nations (KMUN) 2025
+                
 The flagship conference of the Kumaraguru Model United Nations Society, KMUN is a platform where young leaders and changemakers converge to debate, deliberate, and design solutions for today’s most pressing global challenges.
 
 What began in 2023 as a campus initiative has rapidly grown into a nationwide dialogue. By 2024, KMUN welcomed delegates from schools and colleges across India, establishing itself as a hub for meaningful political discourse and diplomacy-driven collaboration.
@@ -146,11 +146,11 @@ Now entering its third edition, KMUN 2025 sets the stage for 300+ bright minds t
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="text-white">
-              <div className="text-3xl md:text-4xl font-bold mb-2">250</div>
+              <div className="text-3xl md:text-4xl font-bold mb-2">250+</div>
               <div className="text-sm md:text-base">Expected Delegates</div>
             </div>
             <div className="text-white">
-              <div className="text-3xl md:text-4xl font-bold mb-2">6</div>
+              <div className="text-3xl md:text-4xl font-bold mb-2">7</div>
               <div className="text-sm md:text-base">Committees</div>
             </div>
             <div className="text-white">

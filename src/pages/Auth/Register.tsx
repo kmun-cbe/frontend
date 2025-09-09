@@ -564,7 +564,6 @@ const Register: React.FC = () => {
                         <option value="">Select institution type</option>
                         <option value="school">School</option>
                         <option value="college">College</option>
-                        <option value="both">Both School & College</option>
                       </select>
                       {errors.institutionType && (
                         <p className="mt-1 text-sm text-red-600">{errors.institutionType.message}</p>
