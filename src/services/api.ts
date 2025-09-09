@@ -16,17 +16,30 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   };
 
   try {
+    console.log(`Making API request to: ${API_BASE_URL}${url}`);
     const response = await fetch(`${API_BASE_URL}${url}`, {
       ...options,
       headers,
     });
 
+    console.log(`Response status: ${response.status} for ${url}`);
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse error response:', parseError);
+        errorData = { message: `HTTP error! status: ${response.status}` };
+      }
+      
+      console.error(`API Error for ${url}:`, errorData);
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(`API Success for ${url}:`, data);
+    return data;
   } catch (error) {
     console.error(`API Error for ${url}:`, error);
     throw error;
@@ -73,34 +86,70 @@ export const authAPI = {
 export const registrationAPI = {
   create: async (data: FormData) => {
     const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/api/registrations`, {
-      method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
-      body: data,
-    });
+    console.log('Creating registration with FormData');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/registrations`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: data,
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.log(`Registration creation response status: ${response.status}`);
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          errorData = { message: `HTTP error! status: ${response.status}` };
+        }
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Registration created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Registration creation error:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   getAll: async () => {
+    console.log('Fetching all registrations');
     return authenticatedFetch('/api/registrations');
   },
 
   getById: async (id: string) => {
+    console.log(`Fetching registration by ID: ${id}`);
     return authenticatedFetch(`/api/registrations/${id}`);
   },
 
   getMyRegistration: async () => {
+    console.log('Fetching my registration');
     return authenticatedFetch('/api/registrations/my-registration');
   },
 
+  getStats: async () => {
+    console.log('Fetching registration stats');
+    return authenticatedFetch('/api/registrations/stats');
+  },
+
+  healthCheck: async () => {
+    console.log('Checking registration API health');
+    return authenticatedFetch('/api/registrations/health');
+  },
+
+  testConnection: async () => {
+    console.log('Testing registration API connection');
+    return authenticatedFetch('/api/registrations/test');
+  },
+
   update: async (id: string, data: any) => {
+    console.log(`Updating registration ${id}:`, data);
     return authenticatedFetch(`/api/registrations/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -108,6 +157,7 @@ export const registrationAPI = {
   },
 
   delete: async (id: string) => {
+    console.log(`Deleting registration ${id}`);
     return authenticatedFetch(`/api/registrations/${id}`, {
       method: 'DELETE',
     });
