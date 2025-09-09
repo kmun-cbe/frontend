@@ -514,8 +514,16 @@ const PopupManagement: React.FC = () => {
 const RegistrationsManagement: React.FC = () => {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingRegistration, setEditingRegistration] = useState<any>(null);
+  const [editFormData, setEditFormData] = useState({
+    status: '',
+    allocatedCommittee: '',
+    allocatedPortfolio: ''
+  });
 
   useEffect(() => {
     fetchRegistrations();
@@ -550,6 +558,74 @@ const RegistrationsManagement: React.FC = () => {
   const handleCloseDetails = () => {
     setShowDetails(false);
     setSelectedRegistration(null);
+  };
+
+  const handleEditRegistration = (registration: any) => {
+    setEditingRegistration(registration);
+    setEditFormData({
+      status: registration.status || 'PENDING',
+      allocatedCommittee: registration.allocatedCommittee || '',
+      allocatedPortfolio: registration.allocatedPortfolio || ''
+    });
+    setShowEditForm(true);
+  };
+
+  const handleDeleteRegistration = async (registrationId: string) => {
+    if (!confirm('Are you sure you want to delete this registration? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await registrationAPI.delete(registrationId);
+
+      if (response.success) {
+        toast.success('Registration deleted successfully');
+        fetchRegistrations();
+      } else {
+        throw new Error(response.message || 'Failed to delete registration');
+      }
+    } catch (error) {
+      console.error('Error deleting registration:', error);
+      toast.error(`Failed to delete registration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateRegistration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingRegistration) {
+      toast.error('No registration selected for editing');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await registrationAPI.update(editingRegistration.id, editFormData);
+
+      if (response.success) {
+        toast.success('Registration updated successfully');
+        setShowEditForm(false);
+        setEditingRegistration(null);
+        setEditFormData({ status: '', allocatedCommittee: '', allocatedPortfolio: '' });
+        fetchRegistrations();
+      } else {
+        throw new Error(response.message || 'Failed to update registration');
+      }
+    } catch (error) {
+      console.error('Error updating registration:', error);
+      toast.error(`Failed to update registration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCloseEditForm = () => {
+    setShowEditForm(false);
+    setEditingRegistration(null);
+    setEditFormData({ status: '', allocatedCommittee: '', allocatedPortfolio: '' });
   };
 
   if (loading) {
@@ -655,12 +731,26 @@ const RegistrationsManagement: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleViewDetails(registration)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleViewDetails(registration)}
+                          className="text-blue-600 hover:text-blue-900 transition-colors"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEditRegistration(registration)}
+                          className="text-green-600 hover:text-green-900 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRegistration(registration.id)}
+                          className="text-red-600 hover:text-red-900 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -787,6 +877,91 @@ const RegistrationsManagement: React.FC = () => {
                     Close
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Registration Modal */}
+        {showEditForm && editingRegistration && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Edit Registration - {editingRegistration.firstName} {editingRegistration.lastName}
+                  </h3>
+                  <button
+                    onClick={handleCloseEditForm}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <form onSubmit={handleUpdateRegistration} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status
+                    </label>
+                    <select
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="SHORTLISTED">Shortlisted</option>
+                      <option value="CONFIRMED">Confirmed</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Allocated Committee
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.allocatedCommittee}
+                      onChange={(e) => setEditFormData({...editFormData, allocatedCommittee: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
+                      placeholder="Enter allocated committee"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Allocated Portfolio
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.allocatedPortfolio}
+                      onChange={(e) => setEditFormData({...editFormData, allocatedPortfolio: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
+                      placeholder="Enter allocated portfolio"
+                    />
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={handleCloseEditForm}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="px-4 py-2 bg-[#172d9d] text-white rounded-md hover:bg-[#0f1a4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {saving ? 'Updating...' : 'Update Registration'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

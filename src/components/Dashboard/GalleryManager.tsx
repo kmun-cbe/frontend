@@ -31,7 +31,8 @@ const GalleryManager: React.FC = () => {
     type: 'image' as 'image' | 'video',
     imageUrl: '',
     videoUrl: '',
-    category: ''
+    category: '',
+    imageFile: null as File | null
   });
 
   useEffect(() => {
@@ -67,8 +68,13 @@ const GalleryManager: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.imageUrl || !formData.category) {
+    if (!formData.title || !formData.category) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.type === 'image' && !formData.imageFile && !formData.imageUrl) {
+      toast.error('Please upload an image file or provide an image URL');
       return;
     }
 
@@ -76,16 +82,31 @@ const GalleryManager: React.FC = () => {
       toast.error('Video URL is required for video type');
       return;
     }
+
+    if (formData.type === 'video' && !formData.imageUrl && !formData.imageFile) {
+      toast.error('Please provide a thumbnail image for the video');
+      return;
+    }
     
     try {
       setSaving(true);
-      const itemData = {
-        title: formData.title,
-        type: formData.type,
-        imageUrl: formData.imageUrl,
-        videoUrl: formData.type === 'video' ? formData.videoUrl : undefined,
-        category: formData.category
-      };
+      
+      // Create FormData for file uploads
+      const itemData = new FormData();
+      itemData.append('title', formData.title);
+      itemData.append('type', formData.type);
+      itemData.append('category', formData.category);
+      
+      if (formData.type === 'video') {
+        itemData.append('videoUrl', formData.videoUrl);
+      }
+      
+      // Handle image upload
+      if (formData.imageFile) {
+        itemData.append('imageFile', formData.imageFile);
+      } else if (formData.imageUrl) {
+        itemData.append('imageUrl', formData.imageUrl);
+      }
 
       let response;
       if (editingItem) {
@@ -121,7 +142,8 @@ const GalleryManager: React.FC = () => {
       type: item.type,
       imageUrl: item.imageUrl,
       videoUrl: item.videoUrl || '',
-      category: item.category
+      category: item.category,
+      imageFile: null
     });
     setShowAddForm(true);
   };
@@ -152,7 +174,8 @@ const GalleryManager: React.FC = () => {
       type: 'image',
       imageUrl: '',
       videoUrl: '',
-      category: ''
+      category: '',
+      imageFile: null
     });
     setEditingItem(null);
     setShowAddForm(false);
@@ -160,6 +183,13 @@ const GalleryManager: React.FC = () => {
 
   const handleVideoClick = (videoUrl: string) => {
     window.open(videoUrl, '_blank');
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({...formData, imageFile: file, imageUrl: ''});
+    }
   };
 
   const filteredItems = galleryItems.filter(item => {
@@ -278,19 +308,101 @@ const GalleryManager: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image URL (Thumbnail for videos) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
-                placeholder="Enter image URL"
-                required
-              />
-            </div>
+            {formData.type === 'image' ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Image <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center w-full">
+                    <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                      <input 
+                        id="image-upload" 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                      />
+                    </label>
+                  </div>
+                  {formData.imageFile && (
+                    <div className="flex items-center space-x-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <ImageIcon className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-green-700">{formData.imageFile.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({...formData, imageFile: null})}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="text-center text-gray-500 text-sm">OR</div>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value, imageFile: null})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
+                    placeholder="Enter image URL instead"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Video Thumbnail Image <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center w-full">
+                    <label htmlFor="video-thumbnail-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload thumbnail</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                      <input 
+                        id="video-thumbnail-upload" 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                      />
+                    </label>
+                  </div>
+                  {formData.imageFile && (
+                    <div className="flex items-center space-x-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <ImageIcon className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-green-700">{formData.imageFile.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({...formData, imageFile: null})}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="text-center text-gray-500 text-sm">OR</div>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value, imageFile: null})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#172d9d] focus:border-transparent"
+                    placeholder="Enter thumbnail image URL instead"
+                  />
+                </div>
+              </div>
+            )}
 
             {formData.type === 'video' && (
               <div>
@@ -305,6 +417,9 @@ const GalleryManager: React.FC = () => {
                   placeholder="Enter video URL (YouTube, Vimeo, etc.)"
                   required
                 />
+                <p className="text-sm text-gray-500 mt-1">
+                  Supported platforms: YouTube, Vimeo, and other video hosting services
+                </p>
               </div>
             )}
 

@@ -11,7 +11,7 @@ interface Committee {
   registered: number;
   topics: string[];
   chairs: string[];
-  image: string;
+  logo?: string;
 }
 
 const Committees: React.FC = () => {
@@ -83,7 +83,26 @@ const Committees: React.FC = () => {
                 <div className="p-8">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
-                      <div className="text-4xl">🏛️</div>
+                      {committee.logo ? (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                          <img 
+                            src={committee.logo} 
+                            alt={`${committee.name} logo`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to emoji if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="text-4xl">🏛️</div>';
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-4xl">🏛️</div>
+                      )}
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">{committee.name}</h3>
                       </div>
