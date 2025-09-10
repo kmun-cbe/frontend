@@ -83,8 +83,6 @@ const Footer: React.FC = () => {
               <li><Link to="/" className="text-gray-300 hover:text-white transition-colors">Home</Link></li>
               <li><a href="https://kumaraguru.in/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">About</a></li>
               <li><Link to="/committees" className="text-gray-300 hover:text-white transition-colors">Committees</Link></li>
-              <li><Link to="/resources" className="text-gray-300 hover:text-white transition-colors">Resources</Link></li>
-              <li><Link to="/gallery" className="text-gray-300 hover:text-white transition-colors">Gallery</Link></li>
               <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
@@ -109,7 +107,6 @@ const Footer: React.FC = () => {
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link to="/privacy-policy" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</Link>
-            <Link to="/terms-of-service" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</Link>
             <Link to="/delegate-guidelines" className="text-gray-400 hover:text-white text-sm transition-colors">Delegate Guidelines</Link>
           </div>
         </div>

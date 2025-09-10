@@ -71,7 +71,7 @@ const UserManagement: React.FC = () => {
     phone: '',
     institution: '',
     grade: '',
-    role: 'PARTICIPANT',
+    role: 'DELEGATE',
     password: ''
   });
 
@@ -81,7 +81,6 @@ const UserManagement: React.FC = () => {
   });
 
   const roles = [
-    'PARTICIPANT',
     'DELEGATE',
     'COMMITTEE_DIRECTOR',
     'DELEGATE_AFFAIRS',
@@ -140,7 +139,7 @@ const UserManagement: React.FC = () => {
       phone: '',
       institution: '',
       grade: '',
-      role: 'PARTICIPANT',
+      role: 'DELEGATE',
       password: ''
     });
     setShowAddForm(false);
@@ -343,7 +342,6 @@ const UserManagement: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     const colors: { [key: string]: string } = {
-      'PARTICIPANT': 'bg-blue-100 text-blue-800',
       'DELEGATE': 'bg-green-100 text-green-800',
       'COMMITTEE_DIRECTOR': 'bg-purple-100 text-purple-800',
       'DELEGATE_AFFAIRS': 'bg-orange-100 text-orange-800',
