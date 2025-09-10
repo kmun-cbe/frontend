@@ -146,6 +146,9 @@ const DelegateAffairsDashboard: React.FC = () => {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Participant
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -168,6 +171,9 @@ const DelegateAffairsDashboard: React.FC = () => {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {registrations.map((registration) => (
                           <tr key={registration.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap font-mono text-sm bg-gray-50">
+                              {registration.user?.userId || registration.userId || 'N/A'}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <div className="font-medium text-gray-900">

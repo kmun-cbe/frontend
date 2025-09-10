@@ -486,6 +486,12 @@ const DelegateDashboard: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-6">Personal Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
+                      <p className="text-gray-900 font-mono text-sm bg-gray-100 px-3 py-1 rounded">
+                        {userProfile?.userId || 'Not Available'}
+                      </p>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                       <p className="text-gray-900">
                         {userProfile?.firstName && userProfile?.lastName 

@@ -408,7 +408,6 @@ Happy MUNning!
                 ₹{pricing.internalDelegate}
               </div>
               <ul className="text-gray-600 mb-8 space-y-2">
-                <li>Conference Access</li>
                 <li>Delegate Package</li>
                 <li>Participation Certificate</li>
                 <li>Professional Networking opportunities</li>
@@ -433,7 +432,6 @@ Happy MUNning!
                 ₹{pricing.externalDelegate}
               </div>
               <ul className="text-gray-600 mb-8 space-y-2">
-              <li>Conference Access</li>
                 <li>Delegate Package</li>
                 <li>Participation Certificate</li>
                 <li>Professional Networking opportunities</li>

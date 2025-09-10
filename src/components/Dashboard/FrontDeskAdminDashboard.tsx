@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -12,14 +12,35 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { usersAPI } from '@/services/api';
+import toast from 'react-hot-toast';
+
+interface User {
+  id: string;
+  userId?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  institution?: string;
+  grade?: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
+}
 
 const FrontDeskAdminDashboard: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('checkin');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<{
     id: string;
+    userId?: string;
     name: string;
     email: string;
     institution: string;
@@ -40,38 +61,47 @@ const FrontDeskAdminDashboard: React.FC = () => {
     { id: 'userinfo', label: 'User Info', icon: User },
   ];
 
-  const participants = [
-    { 
-      id: 'KMUN25001',
-      name: 'John Smith', 
-      email: 'john@university.edu', 
-      institution: 'Harvard University',
-      committee: 'UNSC',
-      portfolio: 'United States',
-      checkedIn: false,
-      kitReceived: false,
-      phone: '+91 9876543210'
-    },
-    { 
-      id: 'KMUN25002',
-      name: 'Sarah Johnson', 
-      email: 'sarah@college.edu', 
-      institution: 'MIT',
-      committee: 'GA',
-      portfolio: 'China',
-      checkedIn: true,
-      kitReceived: true,
-      phone: '+91 9876543211'
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await usersAPI.getAll();
+      
+      if (response.success) {
+        const usersData = response.data || [];
+        setUsers(usersData);
+      } else {
+        throw new Error(response.message || 'Failed to fetch users');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error(`Failed to load users: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const handleUserSearch = (userId: string) => {
-    const user = participants.find(p => p.id === userId);
+    const user = users.find(u => u.userId === userId || u.id === userId);
     if (user) {
-      setSelectedUser(user);
+      setSelectedUser({
+        id: user.id,
+        userId: user.userId,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        institution: user.institution || 'N/A',
+        committee: 'TBD', // This would need to come from registration data
+        portfolio: 'TBD', // This would need to come from registration data
+        checkedIn: false, // This would need to come from check-in data
+        kitReceived: false, // This would need to come from check-in data
+        phone: user.phone || 'N/A'
+      });
       setShowCheckInModal(true);
     } else {
-      alert('User not found');
+      toast.error('User not found');
     }
   };
 
@@ -311,32 +341,49 @@ const FrontDeskAdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {participants.map((participant) => (
-                        <tr key={participant.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap font-mono text-sm">
-                            {participant.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="font-medium text-gray-900">{participant.name}</div>
-                              <div className="text-sm text-gray-500">{participant.institution}</div>
+                      {loading ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                              <span className="ml-2 text-gray-600">Loading users...</span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="font-medium text-gray-900">{participant.committee}</div>
-                              <div className="text-sm text-gray-500">{participant.portfolio}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              participant.checkedIn ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {participant.checkedIn ? 'Checked In' : 'Not Checked In'}
-                            </span>
                           </td>
                         </tr>
-                      ))}
+                      ) : users.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                            No users found
+                          </td>
+                        </tr>
+                      ) : (
+                        users.map((user) => (
+                          <tr key={user.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap font-mono text-sm bg-gray-50">
+                              {user.userId || user.id.slice(-8)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="font-medium text-gray-900">{user.firstName} {user.lastName}</div>
+                                <div className="text-sm text-gray-500">{user.institution || 'N/A'}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="font-medium text-gray-900">TBD</div>
+                                <div className="text-sm text-gray-500">TBD</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {user.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

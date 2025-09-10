@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { 
   Users, 
-  Plus, 
   Edit, 
   Trash2, 
   Search, 
-  Filter,
   RefreshCw,
   Save,
   X,
@@ -14,12 +11,10 @@ import {
   EyeOff,
   Lock,
   Unlock,
-  Mail,
   UserPlus,
   Shield,
   AlertCircle,
-  CheckCircle,
-  Clock
+  CheckCircle
 } from 'lucide-react';
 import { usersAPI } from '@/services/api';
 import toast from 'react-hot-toast';
@@ -109,7 +104,7 @@ const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error(`Failed to load users: ${error.message}`);
+      toast.error(`Failed to load users: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -176,7 +171,7 @@ const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error(`Failed to create user: ${error.message}`);
+      toast.error(`Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -224,14 +219,14 @@ const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      toast.error(`Failed to update user: ${error.message}`);
+      toast.error(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to deactivate this user? They will be blocked from accessing the system.')) {
+    if (!confirm('⚠️ WARNING: This will permanently delete the user and ALL their data including registrations, payments, attendance records, and activity logs. This action cannot be undone. Are you sure you want to proceed?')) {
       return;
     }
 
@@ -240,14 +235,14 @@ const UserManagement: React.FC = () => {
       const response = await usersAPI.delete(userId);
 
       if (response.success) {
-        toast.success('User deactivated successfully');
+        toast.success('User and all related data deleted successfully');
         fetchUsers();
       } else {
-        throw new Error(response.message || 'Failed to deactivate user');
+        throw new Error(response.message || 'Failed to delete user');
       }
     } catch (error) {
-      console.error('Error deactivating user:', error);
-      toast.error(`Failed to deactivate user: ${error.message}`);
+      console.error('Error deleting user:', error);
+      toast.error(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -268,7 +263,7 @@ const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error updating user status:', error);
-      toast.error(`Failed to update user status: ${error.message}`);
+      toast.error(`Failed to update user status: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -309,7 +304,7 @@ const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error updating password:', error);
-      toast.error(`Failed to update password: ${error.message}`);
+      toast.error(`Failed to update password: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -595,10 +590,10 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-900 transition-colors flex items-center"
-                        title="Deactivate user"
+                        title="Permanently delete user and all data"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Deactivate
+                        Delete
                       </button>
                     </div>
                   </td>
