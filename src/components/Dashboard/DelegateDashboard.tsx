@@ -3,11 +3,14 @@ import {
   User, 
   LogOut,
   Calendar,
-  Clock
+  Clock,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { authAPI, registrationAPI } from '@/services/api';
+import { authAPI, registrationAPI, paymentsAPI } from '@/services/api';
 import CompletePaymentButton from '@/components/Common/CompletePaymentButton';
 import toast from 'react-hot-toast';
 
@@ -43,24 +46,14 @@ interface UserProfile {
   lastLogin?: string;
 }
 
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  status: 'upcoming' | 'ongoing' | 'completed';
-}
-
 const DelegateDashboard: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('registration');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -68,132 +61,167 @@ const DelegateDashboard: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
     { id: 'registration', label: 'Registration Details', icon: User },
     { id: 'events', label: 'Event Schedule', icon: Calendar }
   ];
 
-  const fetchUserData = async () => {
-      try {
+  const fetchUserData = async (showRefreshToast = false) => {
+    try {
+      if (showRefreshToast) {
+        setRefreshing(true);
+      } else {
         setLoading(true);
-        
-        // Fetch user profile data
-        const profileResponse = await authAPI.getProfile();
-        let profileData = null;
-        
-        if (profileResponse.success) {
-          const userData = profileResponse.data;
-          
-          // Get the latest registration form data
-          const latestRegistration = userData.registrationForms && userData.registrationForms.length > 0 
-            ? userData.registrationForms[userData.registrationForms.length - 1] 
-            : null;
-          
-          // Merge user data with registration data
-          profileData = {
-            ...userData,
-            ...latestRegistration,
-            // Map registration form fields to profile fields
-            committeePreference1: latestRegistration?.committeePreference1,
-            committeePreference2: latestRegistration?.committeePreference2,
-            committeePreference3: latestRegistration?.committeePreference3,
-            portfolioPreference1: latestRegistration?.portfolioPreference1,
-            portfolioPreference2: latestRegistration?.portfolioPreference2,
-            portfolioPreference3: latestRegistration?.portfolioPreference3,
-            registrationStatus: latestRegistration?.status,
-            allocatedCommittee: latestRegistration?.allocatedCommittee,
-            allocatedPortfolio: latestRegistration?.allocatedPortfolio,
-            institution: latestRegistration?.institution,
-            cityOfInstitution: latestRegistration?.cityOfInstitution,
-            stateOfInstitution: latestRegistration?.stateOfInstitution,
-            grade: latestRegistration?.grade,
-            totalMuns: latestRegistration?.totalMuns,
-            requiresAccommodation: latestRegistration?.requiresAccommodation,
-            gender: latestRegistration?.gender,
-            isKumaraguru: latestRegistration?.isKumaraguru,
-            rollNumber: latestRegistration?.rollNumber,
-            institutionType: latestRegistration?.institutionType,
-          };
-        }
-
-        // If no registration data from profile, try to fetch it separately
-        if (!profileData || !profileData.registrationStatus) {
-          try {
-            const registrationResponse = await registrationAPI.getMyRegistration();
-            if (registrationResponse.success && registrationResponse.registration) {
-              const registration = registrationResponse.registration;
-              profileData = {
-                ...profileData,
-                ...registration,
-                committeePreference1: registration.committeePreference1,
-                committeePreference2: registration.committeePreference2,
-                committeePreference3: registration.committeePreference3,
-                portfolioPreference1: registration.portfolioPreference1,
-                portfolioPreference2: registration.portfolioPreference2,
-                portfolioPreference3: registration.portfolioPreference3,
-                registrationStatus: registration.status,
-                allocatedCommittee: registration.allocatedCommittee,
-                allocatedPortfolio: registration.allocatedPortfolio,
-                institution: registration.institution,
-                cityOfInstitution: registration.cityOfInstitution,
-                stateOfInstitution: registration.stateOfInstitution,
-                grade: registration.grade,
-                totalMuns: registration.totalMuns,
-                requiresAccommodation: registration.requiresAccommodation,
-                gender: registration.gender,
-                isKumaraguru: registration.isKumaraguru,
-                rollNumber: registration.rollNumber,
-                institutionType: registration.institutionType,
-              };
-            }
-          } catch (regError) {
-            console.log('No separate registration data found:', regError);
-          }
-        }
-
-        if (profileData) {
-          setUserProfile(profileData);
-        }
-
-
-        // Mock events data (replace with actual API call)
-        setEvents([
-          {
-            id: '1',
-            title: 'Opening Ceremony',
-            date: '2025-09-26',
-            time: '09:00 - 10:00',
-            location: 'Main Auditorium',
-            description: 'Welcome address and conference inauguration',
-            status: 'upcoming'
-          },
-          {
-            id: '2',
-            title: 'Committee Session I',
-            date: '2025-09-26',
-            time: '10:30 - 12:30',
-            location: 'Committee Rooms',
-            description: 'First committee session with agenda setting',
-            status: 'upcoming'
-          },
-          {
-            id: '3',
-            title: 'Committee Session II',
-            date: '2025-09-27',
-            time: '09:00 - 12:00',
-            location: 'Committee Rooms',
-            description: 'Second committee session with debate',
-            status: 'upcoming'
-          }
-        ]);
-
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        toast.error('Failed to load user data');
-      } finally {
-        setLoading(false);
       }
-    };
+      setError(null);
+      
+      console.log('Fetching user data...');
+      
+      // Fetch user profile data
+      const profileResponse = await authAPI.getProfile();
+      let profileData = null;
+      
+      if (profileResponse.success) {
+        const userData = profileResponse.data;
+        console.log('Profile data received:', userData);
+        
+        // Get the latest registration form data
+        const latestRegistration = userData.registrationForms && userData.registrationForms.length > 0 
+          ? userData.registrationForms[userData.registrationForms.length - 1] 
+          : null;
+        
+        console.log('Latest registration:', latestRegistration);
+        
+        // Merge user data with registration data
+        profileData = {
+          ...userData,
+          ...latestRegistration,
+          // Map registration form fields to profile fields
+          committeePreference1: latestRegistration?.committeePreference1,
+          committeePreference2: latestRegistration?.committeePreference2,
+          committeePreference3: latestRegistration?.committeePreference3,
+          portfolioPreference1: latestRegistration?.portfolioPreference1,
+          portfolioPreference2: latestRegistration?.portfolioPreference2,
+          portfolioPreference3: latestRegistration?.portfolioPreference3,
+          registrationStatus: latestRegistration?.status,
+          allocatedCommittee: latestRegistration?.allocatedCommittee,
+          allocatedPortfolio: latestRegistration?.allocatedPortfolio,
+          institution: latestRegistration?.institution,
+          cityOfInstitution: latestRegistration?.cityOfInstitution,
+          stateOfInstitution: latestRegistration?.stateOfInstitution,
+          grade: latestRegistration?.grade,
+          totalMuns: latestRegistration?.totalMuns,
+          requiresAccommodation: latestRegistration?.requiresAccommodation,
+          gender: latestRegistration?.gender,
+          isKumaraguru: latestRegistration?.isKumaraguru,
+          rollNumber: latestRegistration?.rollNumber,
+          institutionType: latestRegistration?.institutionType,
+        };
+      }
+
+      // If no registration data from profile, try to fetch it separately
+      if (!profileData || !profileData.registrationStatus) {
+        try {
+          console.log('Fetching separate registration data...');
+          const registrationResponse = await registrationAPI.getMyRegistration();
+          if (registrationResponse.success && registrationResponse.registration) {
+            const registration = registrationResponse.registration;
+            console.log('Separate registration data:', registration);
+            profileData = {
+              ...profileData,
+              ...registration,
+              committeePreference1: registration.committeePreference1,
+              committeePreference2: registration.committeePreference2,
+              committeePreference3: registration.committeePreference3,
+              portfolioPreference1: registration.portfolioPreference1,
+              portfolioPreference2: registration.portfolioPreference2,
+              portfolioPreference3: registration.portfolioPreference3,
+              registrationStatus: registration.status,
+              allocatedCommittee: registration.allocatedCommittee,
+              allocatedPortfolio: registration.allocatedPortfolio,
+              institution: registration.institution,
+              cityOfInstitution: registration.cityOfInstitution,
+              stateOfInstitution: registration.stateOfInstitution,
+              grade: registration.grade,
+              totalMuns: registration.totalMuns,
+              requiresAccommodation: registration.requiresAccommodation,
+              gender: registration.gender,
+              isKumaraguru: registration.isKumaraguru,
+              rollNumber: registration.rollNumber,
+              institutionType: registration.institutionType,
+            };
+          }
+        } catch (regError) {
+          console.log('No separate registration data found:', regError);
+        }
+      }
+
+      // Fetch payment status if we have registration data
+      if (profileData && profileData.registrationId) {
+        try {
+          console.log('Fetching payment status...');
+          const paymentsResponse = await paymentsAPI.getAll({ userId: profileData.id });
+          if (paymentsResponse.success && paymentsResponse.data && paymentsResponse.data.length > 0) {
+            const latestPayment = paymentsResponse.data[0];
+            profileData.paymentStatus = latestPayment.status;
+            console.log('Payment status updated:', latestPayment.status);
+          }
+        } catch (paymentError) {
+          console.log('No payment data found:', paymentError);
+          // Set default payment status based on registration status
+          if (profileData.registrationStatus === 'PENDING') {
+            profileData.paymentStatus = 'PENDING';
+          } else if (profileData.registrationStatus === 'APPROVED') {
+            profileData.paymentStatus = 'COMPLETED';
+          }
+        }
+      }
+
+      if (profileData) {
+        setUserProfile(profileData);
+        console.log('Final profile data set:', profileData);
+        if (showRefreshToast) {
+          toast.success('Data refreshed successfully!');
+        }
+      } else {
+        setError('No user data found. Please try logging in again.');
+      }
+
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load user data';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchUserData(true);
+  };
+
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log('Payment successful:', paymentData);
+    toast.success('Payment completed successfully!');
+    // Update payment status immediately
+    if (userProfile) {
+      setUserProfile(prev => prev ? { ...prev, paymentStatus: 'COMPLETED', registrationStatus: 'APPROVED' } : null);
+    }
+    // Refresh data after a short delay
+    setTimeout(() => {
+      fetchUserData(true);
+    }, 1000);
+  };
+
+  const handlePaymentFailure = (error: any) => {
+    console.error('Payment failed:', error);
+    toast.error('Payment failed. Please try again.');
+    // Update payment status to failed
+    if (userProfile) {
+      setUserProfile(prev => prev ? { ...prev, paymentStatus: 'FAILED' } : null);
+    }
+  };
 
   useEffect(() => {
     fetchUserData();
@@ -207,16 +235,16 @@ const DelegateDashboard: React.FC = () => {
     });
   };
 
-
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'text-blue-600 bg-blue-100';
-      case 'ongoing': return 'text-green-600 bg-green-100';
-      case 'completed': return 'text-gray-600 bg-gray-100';
+    switch (status?.toUpperCase()) {
+      case 'PENDING': return 'text-yellow-600 bg-yellow-100';
+      case 'APPROVED': return 'text-green-600 bg-green-100';
+      case 'REJECTED': return 'text-red-600 bg-red-100';
+      case 'COMPLETED': return 'text-green-600 bg-green-100';
+      case 'FAILED': return 'text-red-600 bg-red-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
 
   if (loading) {
     return (
@@ -224,6 +252,32 @@ const DelegateDashboard: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#172d9d] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <div className="space-x-3">
+            <button
+              onClick={handleRefresh}
+              className="bg-[#172d9d] text-white px-4 py-2 rounded-lg hover:bg-[#1a2a8a] transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={handleLogout}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -260,138 +314,54 @@ const DelegateDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
+                title="Refresh Data"
+              >
+                <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="flex h-[calc(100vh-4rem)]">
-          {/* Sidebar */}
+        {/* Sidebar */}
         <div className="w-64 bg-white shadow-sm border-r border-gray-200">
           <div className="p-6">
-              <nav className="space-y-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id
+            <nav className="space-y-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                    activeTab === tab.id
                       ? 'bg-[#172d9d] text-white'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <tab.icon className="w-5 h-5" />
-                    <span className="font-medium">{tab.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span className="font-medium">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
+        </div>
 
-          {/* Main Content */}
+        {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
-            {activeTab === 'profile' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Profile Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <p className="text-gray-900">
-                      {userProfile?.firstName && userProfile?.lastName 
-                        ? `${userProfile.firstName} ${userProfile.lastName}`
-                        : 'Not Available'
-                      }
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <p className="text-gray-900">{userProfile?.email || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone
-                    </label>
-                    <p className="text-gray-900">{userProfile?.phone || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Institution
-                    </label>
-                    <p className="text-gray-900">{userProfile?.institution || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Grade/Year
-                    </label>
-                    <p className="text-gray-900 capitalize">{userProfile?.grade || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      User ID
-                    </label>
-                    <p className="text-gray-900 font-mono">{userProfile?.userId || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Committee Preference 1
-                    </label>
-                    <p className="text-gray-900">{userProfile?.committeePreference1 || 'Not Available'}</p>
-                </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Committee Preference 2
-                    </label>
-                    <p className="text-gray-900">{userProfile?.committeePreference2 || 'Not Available'}</p>
-              </div>
-                    <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Committee Preference 3
-                      </label>
-                    <p className="text-gray-900">{userProfile?.committeePreference3 || 'Not Available'}</p>
-                    </div>
-                    <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Status
-                      </label>
-                    <p className="text-gray-900">{userProfile?.paymentStatus || 'Not Available'}</p>
-                    </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Registration Status
-                    </label>
-                    <p className="text-gray-900">{userProfile?.registrationStatus || 'Not Available'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Registration Date
-                    </label>
-                    <p className="text-gray-900">
-                      {userProfile?.createdAt ? formatDate(userProfile.createdAt) : 'Not Available'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Last Login
-                    </label>
-                    <p className="text-gray-900">
-                      {userProfile?.lastLogin ? formatDate(userProfile.lastLogin) : 'Not Available'}
-                    </p>
-                </div>
-                </div>
-              </div>
-            )}
-
             {activeTab === 'registration' && (
               <div className="space-y-6">
                 {/* Registration Status Card */}
@@ -399,16 +369,16 @@ const DelegateDashboard: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-6">Registration Status</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className={`text-2xl font-bold px-3 py-1 rounded-full inline-block ${getStatusColor(userProfile?.registrationStatus || 'PENDING')}`}>
                         {userProfile?.registrationStatus || 'PENDING'}
                       </div>
-                      <div className="text-sm text-blue-800">Registration Status</div>
+                      <div className="text-sm text-blue-800 mt-2">Registration Status</div>
                     </div>
                     <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className={`text-2xl font-bold px-3 py-1 rounded-full inline-block ${getStatusColor(userProfile?.paymentStatus || 'PENDING')}`}>
                         {userProfile?.paymentStatus || 'PENDING'}
                       </div>
-                      <div className="text-sm text-green-800">Payment Status</div>
+                      <div className="text-sm text-green-800 mt-2">Payment Status</div>
                     </div>
                     <div className="text-center p-4 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
@@ -420,17 +390,30 @@ const DelegateDashboard: React.FC = () => {
                 </div>
 
                 {/* Payment Section */}
-                {userProfile?.paymentStatus === 'PENDING' && (
+                {(userProfile?.paymentStatus === 'PENDING' || userProfile?.paymentStatus === 'FAILED') && (
                   <div className="bg-white rounded-lg shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-6">Complete Your Payment</h3>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <div className={`border rounded-lg p-4 mb-6 ${
+                      userProfile?.paymentStatus === 'FAILED' 
+                        ? 'bg-red-50 border-red-200' 
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <Clock className="h-5 w-5 text-yellow-400" />
+                          {userProfile?.paymentStatus === 'FAILED' ? (
+                            <AlertCircle className="h-5 w-5 text-red-400" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-yellow-400" />
+                          )}
                         </div>
                         <div className="ml-3">
-                          <p className="text-sm text-yellow-800">
-                            Your registration is pending payment. Complete your payment to confirm your participation in Kumaraguru MUN 2025.
+                          <p className={`text-sm ${
+                            userProfile?.paymentStatus === 'FAILED' ? 'text-red-800' : 'text-yellow-800'
+                          }`}>
+                            {userProfile?.paymentStatus === 'FAILED' 
+                              ? 'Your payment failed. Please try again to complete your registration.'
+                              : 'Your registration is pending payment. Complete your payment to confirm your participation in Kumaraguru MUN 2025.'
+                            }
                           </p>
                         </div>
                       </div>
@@ -439,22 +422,27 @@ const DelegateDashboard: React.FC = () => {
                     {userProfile && (
                       <CompletePaymentButton
                         userId={userProfile.id}
-                        registrationId={userProfile.registrationId || userProfile.id} // Use registration ID if available, fallback to user ID
+                        registrationId={userProfile.registrationId || userProfile.id}
                         customUserId={userProfile.userId || 'N/A'}
                         isKumaraguru={userProfile.isKumaraguru || false}
-                        onPaymentSuccess={(paymentData) => {
-                          console.log('Payment successful:', paymentData);
-                          toast.success('Payment completed successfully!');
-                          // Refresh user data
-                          fetchUserData();
-                        }}
-                        onPaymentFailure={(error) => {
-                          console.error('Payment failed:', error);
-                          toast.error('Payment failed. Please try again.');
-                        }}
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onPaymentFailure={handlePaymentFailure}
                         className="max-w-md mx-auto"
                       />
                     )}
+                  </div>
+                )}
+
+                {/* Payment Success Message */}
+                {userProfile?.paymentStatus === 'COMPLETED' && (
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="text-center">
+                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Completed!</h3>
+                      <p className="text-gray-600">
+                        Your registration is now confirmed. You will receive further updates via email.
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -627,7 +615,7 @@ const DelegateDashboard: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    {userProfile?.paymentStatus === 'PAID' && (
+                    {userProfile?.paymentStatus === 'COMPLETED' && (
                       <div className="flex items-center space-x-4">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                         <div>
@@ -641,47 +629,24 @@ const DelegateDashboard: React.FC = () => {
               </div>
             )}
 
-
             {activeTab === 'events' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Event Schedule</h3>
                 
-                {events.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No events scheduled</p>
+                <div className="text-center py-12">
+                  <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-xl font-semibold text-gray-700 mb-2">Event Schedule Coming Soon</h4>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    We're working on finalizing the event schedule for Kumaraguru MUN 2025. 
+                    The complete schedule will be released soon. Stay tuned for updates!
+                  </p>
+                  <div className="mt-6">
+                    <div className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
+                      <Clock className="w-4 h-4 mr-2" />
+                      <span className="text-sm font-medium">To be released soon</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {events.map((event) => (
-                      <div key={event.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 mb-1">{event.title}</h4>
-                            <p className="text-gray-600 text-sm mb-2">{event.description}</p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="w-4 h-4" />
-                                <span>{formatDate(event.date)}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Clock className="w-4 h-4" />
-                                <span>{event.time}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <span>📍</span>
-                                <span>{event.location}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-                            {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                </div>
               </div>
             )}
           </div>

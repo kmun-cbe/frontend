@@ -4,13 +4,13 @@ import { Play, Image as ImageIcon, Video } from 'lucide-react';
 import { galleryAPI } from '@/services/api';
 import { GalleryItem } from '@/types';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import toast from 'react-hot-toast';
 
 const Gallery: React.FC = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const comingSoon = true;
 
   useEffect(() => {
     fetchGalleryData();
@@ -37,7 +37,6 @@ const Gallery: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching gallery data:', error);
-      toast.error('Failed to load gallery data');
     } finally {
       setLoading(false);
     }
@@ -53,7 +52,6 @@ const Gallery: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching gallery items:', error);
-      toast.error('Failed to load gallery items');
     }
   };
 
@@ -69,6 +67,44 @@ const Gallery: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Temporarily show "Available soon" notice and suppress grid/filter rendering
+  if (comingSoon) {
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white py-20">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">Gallery</h1>
+              <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+                Gallery will be available soon. Stay tuned for updates!
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Coming Soon Message */}
+        <section className="py-24">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 mb-6">
+              <ImageIcon className="w-4 h-4 mr-2" />
+              <span className="font-medium">Available soon</span>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">We are curating the best moments</h2>
+            <p className="text-gray-600">
+              Our team is putting together highlights and media from Kumaraguru MUN. Please check back later to explore the full gallery.
+            </p>
+          </div>
+        </section>
       </div>
     );
   }

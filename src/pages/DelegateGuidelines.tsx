@@ -63,7 +63,7 @@ const DelegateGuidelines: React.FC = () => {
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>All delegates, whether registering individually or as part of a delegation, must complete their registration through our official website: <strong>mun.kumaraguru.in</strong></span>
+                    <span>All delegates, whether registering individually or as part of a delegation, must complete their registration individually through our official website: <strong>mun.kumaraguru.in</strong></span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
@@ -300,7 +300,7 @@ const DelegateGuidelines: React.FC = () => {
               {/* Social Media */}
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">STAY CONNECTED</h2>
-                <p className="text-gray-700 mb-4">Follow our official social media handles for the latest updates and announcements about Kumaraguru MUN 2025:</p>
+                <p className="text-gray-700 mb-4">Follow our official social media handles and check for E-mail communications for the latest updates and announcements about Kumaraguru MUN 2025</p>
               </div>
 
               {/* Closing Message */}

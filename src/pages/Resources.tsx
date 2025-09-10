@@ -5,9 +5,7 @@ import {
   Download, 
   FileText, 
   BookOpen, 
-  Video,
-  Calendar,
-  Eye
+  Video
 } from 'lucide-react';
 
 const Resources: React.FC = () => {
@@ -22,182 +20,30 @@ const Resources: React.FC = () => {
   ];
 
   const resources = [
+    
     {
       id: 1,
-      title: 'UNSC Background Guide',
-      description: 'Comprehensive guide for the United Nations Security Council committee',
-      type: 'guides',
+      title: 'Event Official Brochure',
+      description: 'A descriptive overview of the event',
+      type: 'rules',
       format: 'PDF',
-      size: '2.4 MB',
-      uploadDate: '2024-12-15',
-      downloads: 245,
-      url: '/resources/unsc-bg.pdf'
+      //size: '1.8 MB',
+      //uploadDate: '2024-12-10',
+      //downloads: 189,
+      url: '/A5_MUN Broucher 2025_Final.pdf'
     },
     {
       id: 2,
-      title: 'General Assembly Rules of Procedure',
-      description: 'Official rules and procedures for General Assembly committees',
-      type: 'rules',
-      format: 'PDF',
-      size: '1.8 MB',
-      uploadDate: '2024-12-10',
-      downloads: 189,
-      url: '/resources/ga-rules.pdf'
-    },
-    {
-      id: 3,
-      title: 'Position Paper Template',
-      description: 'Standard template for writing position papers',
-      type: 'templates',
-      format: 'DOCX',
-      size: '0.5 MB',
-      uploadDate: '2024-12-08',
-      downloads: 156,
-      url: '/resources/position-paper-template.docx'
-    },
-    {
-      id: 4,
-      title: 'MUN Training Video Series',
-      description: 'Complete video series on MUN procedures and best practices',
-      type: 'videos',
-      format: 'MP4',
-      size: '150 MB',
-      uploadDate: '2024-12-05',
-      downloads: 98,
-      url: '/resources/mun-training.mp4'
-    },
-    {
-      id: 5,
-      title: 'ECOSOC Background Guide',
-      description: 'Economic and Social Council committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.1 MB',
-      uploadDate: '2024-12-12',
-      downloads: 134,
-      url: '/resources/ecosoc-bg.pdf'
-    },
-    {
-      id: 6,
-      title: 'Resolution Template',
-      description: 'Standard format for drafting resolutions',
-      type: 'templates',
-      format: 'DOCX',
-      size: '0.3 MB',
-      uploadDate: '2024-12-07',
-      downloads: 167,
-      url: '/resources/resolution-template.docx'
-    },
-    {
-      id: 7,
-      title: 'HRC Background Guide',
-      description: 'Human Rights Council committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.3 MB',
-      uploadDate: '2024-12-14',
-      downloads: 112,
-      url: '/resources/hrc-bg.pdf'
-    },
-    {
-      id: 8,
-      title: 'ICJ Background Guide',
-      description: 'International Court of Justice committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.0 MB',
-      uploadDate: '2024-12-13',
-      downloads: 98,
-      url: '/resources/icj-bg.pdf'
-    },
-    {
-      id: 9,
-      title: 'WHO Background Guide',
-      description: 'World Health Organization committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.2 MB',
-      uploadDate: '2024-12-12',
-      downloads: 145,
-      url: '/resources/who-bg.pdf'
-    },
-    {
-      id: 10,
-      title: 'GA1 Background Guide',
-      description: 'General Assembly First Committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.1 MB',
-      uploadDate: '2024-12-11',
-      downloads: 134,
-      url: '/resources/ga1-bg.pdf'
-    },
-    {
-      id: 11,
       title: 'Delegate Guidelines',
-      description: 'Comprehensive guidelines for delegates participating in K-MUN 2025',
+      description: 'Guidelines for delegates to be followed',
       type: 'rules',
       format: 'PDF',
-      size: '1.5 MB',
-      uploadDate: '2024-12-09',
-      downloads: 203,
-      url: '/resources/delegate-guidelines.pdf'
-    },
-    {
-      id: 12,
-      title: 'Event Brochure',
-      description: 'Official event brochure with complete information about K-MUN 2025',
-      type: 'templates',
-      format: 'PDF',
-      size: '3.2 MB',
-      uploadDate: '2024-12-06',
-      downloads: 89,
-      url: '/resources/event-brochure.pdf'
-    },
-    {
-      id: 13,
-      title: 'GA2 Background Guide',
-      description: 'General Assembly Second Committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.0 MB',
-      uploadDate: '2024-12-10',
-      downloads: 87,
-      url: '/resources/ga2-bg.pdf'
-    },
-    {
-      id: 14,
-      title: 'GA3 Background Guide',
-      description: 'General Assembly Third Committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.1 MB',
-      uploadDate: '2024-12-09',
-      downloads: 92,
-      url: '/resources/ga3-bg.pdf'
-    },
-    {
-      id: 15,
-      title: 'GA4 Background Guide',
-      description: 'General Assembly Fourth Committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.2 MB',
-      uploadDate: '2024-12-08',
-      downloads: 78,
-      url: '/resources/ga4-bg.pdf'
-    },
-    {
-      id: 16,
-      title: 'GA6 Background Guide',
-      description: 'General Assembly Sixth Committee background guide',
-      type: 'guides',
-      format: 'PDF',
-      size: '2.0 MB',
-      uploadDate: '2024-12-07',
-      downloads: 85,
-      url: '/resources/ga6-bg.pdf'
+      //size: '1.8 MB',
+      //uploadDate: '2024-12-10',
+      //downloads: 189,
+      url: '/KMUN\'25 Guidelines.pdf'
     }
+    
   ];
 
   const filteredResources = resources.filter(resource => {
@@ -218,8 +64,18 @@ const Resources: React.FC = () => {
   };
 
   const handleDownload = (resource: any) => {
-    console.log('Downloading:', resource.title);
-    // Implement download logic
+    if (resource.url) {
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = resource.url;
+      link.download = `${resource.title}.${resource.format.toLowerCase()}`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.warn('No URL provided for resource:', resource.title);
+    }
   };
 
   const handleWatch = (resource: any) => {
@@ -289,21 +145,14 @@ const Resources: React.FC = () => {
                       {getFileIcon(resource.format)}
                       <div>
                         <h3 className="text-lg font-bold text-gray-900">{resource.title}</h3>
-                        <p className="text-sm text-gray-500">{resource.format} • {resource.size}</p>
+                        <p className="text-sm text-gray-500">{resource.format} </p>
                       </div>
                     </div>
                   </div>
 
                   <p className="text-gray-600 mb-4">{resource.description}</p>
 
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(resource.uploadDate).toLocaleDateString()}</span>
-                    </div>
-                    <span>{resource.downloads} downloads</span>
-                  </div>
-
+                  
                   <div className="flex gap-2">
                     {resource.type === 'videos' ? (
                       <button
@@ -332,7 +181,7 @@ const Resources: React.FC = () => {
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-900 mb-2">No resources found</h3>
-              <p className="text-gray-600">Try adjusting your filter criteria</p>
+              <p className="text-gray-600">We are curating the best resources for you. Available soon!</p>
             </div>
           )}
         </div>
