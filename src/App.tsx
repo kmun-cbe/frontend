@@ -13,7 +13,6 @@ import Contact from './pages/Contact';
 import Resources from './pages/Resources';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import DelegateGuidelines from './pages/DelegateGuidelines';
-import TermsOfService from './pages/TermsOfService';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Error404 from './pages/Error404';
@@ -122,7 +121,6 @@ function App() {
             <Route path="/resources" element={<Layout><Resources /></Layout>} />
             <Route path="/privacy-policy" element={<Layout><PrivacyPolicy /></Layout>} />
             <Route path="/delegate-guidelines" element={<Layout><DelegateGuidelines /></Layout>} />
-            <Route path="/terms-of-service" element={<Layout><TermsOfService /></Layout>} />
             <Route path="/login" element={<Layout><Login /></Layout>} />
             <Route path="/register" element={<Layout><Register /></Layout>} />
             

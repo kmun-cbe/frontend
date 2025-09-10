@@ -951,10 +951,6 @@ const Register: React.FC = () => {
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                     I agree to the{' '}
-                    <Link to="/terms-of-service" className="text-blue-800 hover:text-blue-900">
-                      Terms and Conditions
-                    </Link>
-                    ,{' '}
                     <Link to="/delegate-guidelines" className="text-blue-800 hover:text-blue-900">
                       Delegate Guidelines
                     </Link>
