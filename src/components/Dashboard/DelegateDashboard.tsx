@@ -81,11 +81,12 @@ const DelegateDashboard: React.FC = () => {
       let profileData = null;
       
       if (profileResponse.success) {
-        const userData = profileResponse.data;
+        const userData = profileResponse.user || profileResponse.data;
         console.log('Profile data received:', userData);
+        console.log('Registration forms available:', userData?.registrationForms);
         
-        // Get the latest registration form data
-        const latestRegistration = userData.registrationForms && userData.registrationForms.length > 0 
+        // Get the latest registration form data with proper null checks
+        const latestRegistration = userData && userData.registrationForms && userData.registrationForms.length > 0 
           ? userData.registrationForms[userData.registrationForms.length - 1] 
           : null;
         
@@ -93,8 +94,8 @@ const DelegateDashboard: React.FC = () => {
         
         // Merge user data with registration data
         profileData = {
-          ...userData,
-          ...latestRegistration,
+          ...(userData || {}),
+          ...(latestRegistration || {}),
           // Map registration form fields to profile fields
           committeePreference1: latestRegistration?.committeePreference1,
           committeePreference2: latestRegistration?.committeePreference2,
@@ -127,7 +128,7 @@ const DelegateDashboard: React.FC = () => {
             const registration = registrationResponse.registration;
             console.log('Separate registration data:', registration);
             profileData = {
-              ...profileData,
+              ...(profileData || {}),
               ...registration,
               committeePreference1: registration.committeePreference1,
               committeePreference2: registration.committeePreference2,
