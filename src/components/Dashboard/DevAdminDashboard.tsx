@@ -570,7 +570,15 @@ const RegistrationsManagement: React.FC = () => {
   };
 
   const handleDeleteRegistration = async (registrationId: string) => {
-    if (!confirm('Are you sure you want to delete this registration? This action cannot be undone.')) {
+    // Find the registration to get user details for confirmation
+    const registration = registrations.find(reg => reg.id === registrationId);
+    const userName = registration ? `${registration.firstName} ${registration.lastName}` : 'this user';
+    const userEmail = registration?.email || 'N/A';
+    const userCustomId = registration?.user?.userId || registration?.userId || 'N/A';
+
+    const confirmMessage = `Are you sure you want to delete the registration for ${userName} (${userCustomId})?\n\nThis will permanently delete:\n• Registration form and all data\n• User account\n• All payment records\n• All activity logs\n• All marks and attendance records\n• All check-in records\n• All committee registrations\n• Uploaded documents\n• Send deletion notification email to ${userEmail}\n\nThis action cannot be undone.`;
+
+    if (!confirm(confirmMessage)) {
       return;
     }
 
@@ -579,7 +587,7 @@ const RegistrationsManagement: React.FC = () => {
       const response = await registrationAPI.delete(registrationId);
 
       if (response.success) {
-        toast.success('Registration deleted successfully');
+        toast.success(`Registration and user account deleted successfully. Deletion notification email sent to ${userEmail}.`);
         fetchRegistrations();
       } else {
         throw new Error(response.message || 'Failed to delete registration');

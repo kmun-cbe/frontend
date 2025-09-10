@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import PaymentGateway from '@/components/Common/PaymentGateway';
+import PrivacyModal from '@/components/Common/PrivacyModal';
 import { 
   User, 
   Mail, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { committeesAPI, pricingAPI, registrationAPI } from '@/services/api';
+import { delegateGuidelines, privacyPolicy } from '@/data/privacyContent';
 
 interface Committee {
   id: string;
@@ -88,6 +90,11 @@ const Register: React.FC = () => {
   const [registrationData, setRegistrationData] = useState<any>(null);
   const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(null);
   const [selectedMunResume, setSelectedMunResume] = useState<File | null>(null);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [privacyModalContent, setPrivacyModalContent] = useState('');
+  const [privacyModalTitle, setPrivacyModalTitle] = useState('');
+  const [pendingRegistrationData, setPendingRegistrationData] = useState<any>(null);
   const navigate = useNavigate();
 
   const {
@@ -176,8 +183,42 @@ const Register: React.FC = () => {
     setSelectedMunResume(file);
   };
 
+  const openPrivacyModal = (type: 'privacy' | 'guidelines') => {
+    if (type === 'privacy') {
+      setPrivacyModalTitle('Privacy Policy');
+      setPrivacyModalContent(privacyPolicy);
+      setShowPrivacyModal(true);
+    } else {
+      setPrivacyModalTitle('Delegate Guidelines');
+      setPrivacyModalContent(delegateGuidelines);
+      setShowGuidelinesModal(true);
+    }
+  };
+
+  const closePrivacyModal = () => {
+    setShowPrivacyModal(false);
+    setShowGuidelinesModal(false);
+  };
+
+  // Check for pending registration data on page load
+  useEffect(() => {
+    const pendingData = localStorage.getItem('pendingRegistration');
+    if (pendingData) {
+      try {
+        const parsed = JSON.parse(pendingData);
+        setPendingRegistrationData(parsed);
+        setRegistrationData(parsed);
+        setShowPayment(true);
+        toast.info('You have a pending payment. Please complete it to finish your registration.');
+      } catch (error) {
+        console.error('Error parsing pending registration data:', error);
+        localStorage.removeItem('pendingRegistration');
+      }
+    }
+  }, []);
+
   const onSubmit = async (data: RegistrationForm) => {
-    const loadingToast = toast.loading('Submitting registration...');
+    const loadingToast = toast.loading('Preparing registration for payment...');
     setLoading(true);
     
     try {
@@ -213,11 +254,11 @@ const Register: React.FC = () => {
         console.log(`${key}:`, value);
       }
       
-      // Call the registration API
+      // Call the registration API to create user and prepare for payment
       const response = await registrationAPI.create(formData);
       
       if (response.success) {
-        toast.success('Registration submitted successfully!', { id: loadingToast });
+        toast.success('Registration prepared! Please complete payment to finish registration.', { id: loadingToast });
         setLoading(false);
         
         // Store the authentication token for payment API calls
@@ -231,9 +272,14 @@ const Register: React.FC = () => {
           userId: response.user.id,
           customUserId: response.user.userId
         };
+        
+        // Store pending registration data in localStorage
+        localStorage.setItem('pendingRegistration', JSON.stringify(registrationWithUserId));
+        
         console.log('Setting registration data:', registrationWithUserId);
         console.log('Pricing data:', pricing);
         setRegistrationData(registrationWithUserId);
+        setPendingRegistrationData(registrationWithUserId);
         setShowPayment(true);
       } else {
         throw new Error(response.message || 'Registration failed');
@@ -245,8 +291,38 @@ const Register: React.FC = () => {
     }
   };
 
-  const handlePaymentSuccess = (paymentData: any) => {
+  const handlePaymentSuccess = async (paymentData: any) => {
     console.log('Payment successful:', paymentData);
+    
+    try {
+      // Clear pending registration data
+      localStorage.removeItem('pendingRegistration');
+      
+      // Send payment success email with credentials
+      const emailResponse = await fetch('/api/mailer/send-payment-success', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('munToken')}`
+        },
+        body: JSON.stringify({
+          userId: registrationData.userId,
+          customUserId: registrationData.customUserId,
+          email: registrationData.email,
+          name: `${registrationData.firstName} ${registrationData.lastName}`,
+          paymentData: paymentData
+        })
+      });
+
+      if (emailResponse.ok) {
+        console.log('Payment success email sent');
+      } else {
+        console.error('Failed to send payment success email');
+      }
+    } catch (error) {
+      console.error('Error sending payment success email:', error);
+    }
+    
     setSubmitted(true);
     setShowPayment(false);
     
@@ -262,7 +338,8 @@ const Register: React.FC = () => {
   const handlePaymentFailure = (error: any) => {
     console.error('Payment failed:', error);
     toast.error('Payment failed. Please try again or contact support.');
-    setShowPayment(false);
+    // Keep payment modal open so user can retry
+    // setShowPayment(false); // Commented out to keep user on payment page
   };
 
   const handlePaymentClose = () => {
@@ -951,13 +1028,21 @@ const Register: React.FC = () => {
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                     I agree to the{' '}
-                    <Link to="/delegate-guidelines" className="text-blue-800 hover:text-blue-900">
+                    <button
+                      type="button"
+                      onClick={() => openPrivacyModal('guidelines')}
+                      className="text-blue-800 hover:text-blue-900 underline"
+                    >
                       Delegate Guidelines
-                    </Link>
+                    </button>
                     {' '}and{' '}
-                    <Link to="/privacy-policy" className="text-blue-800 hover:text-blue-900">
+                    <button
+                      type="button"
+                      onClick={() => openPrivacyModal('privacy')}
+                      className="text-blue-800 hover:text-blue-900 underline"
+                    >
                       Privacy Policy
-                    </Link>
+                    </button>
                   </label>
                 </div>
                 {errors.terms && (
@@ -1062,6 +1147,21 @@ const Register: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Privacy Modals */}
+      <PrivacyModal
+        isOpen={showPrivacyModal}
+        onClose={closePrivacyModal}
+        title={privacyModalTitle}
+        content={privacyModalContent}
+      />
+      
+      <PrivacyModal
+        isOpen={showGuidelinesModal}
+        onClose={closePrivacyModal}
+        title={privacyModalTitle}
+        content={privacyModalContent}
+      />
     </div>
   );
 };

@@ -6,7 +6,8 @@ import {
   MessageSquare,
   UserCheck,
   LogOut,
-  Edit
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +35,7 @@ const DelegateAffairsDashboard: React.FC = () => {
 
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
@@ -54,9 +56,40 @@ const DelegateAffairsDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      toast.error(`Failed to load registrations: ${error.message}`);
+      toast.error(`Failed to load registrations: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteRegistration = async (registrationId: string) => {
+    // Find the registration to get user details for confirmation
+    const registration = registrations.find(reg => reg.id === registrationId);
+    const userName = registration ? `${registration.firstName} ${registration.lastName}` : 'this user';
+    const userEmail = registration?.email || 'N/A';
+    const userCustomId = registration?.user?.userId || registration?.userId || 'N/A';
+
+    const confirmMessage = `Are you sure you want to delete the registration for ${userName} (${userCustomId})?\n\nThis will permanently delete:\n• Registration form and all data\n• User account\n• All payment records\n• All activity logs\n• All marks and attendance records\n• All check-in records\n• All committee registrations\n• Uploaded documents\n• Send deletion notification email to ${userEmail}\n\nThis action cannot be undone.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await registrationAPI.delete(registrationId);
+
+      if (response.success) {
+        toast.success(`Registration and user account deleted successfully. Deletion notification email sent to ${userEmail}.`);
+        fetchRegistrations();
+      } else {
+        throw new Error(response.message || 'Failed to delete registration');
+      }
+    } catch (error) {
+      console.error('Error deleting registration:', error);
+      toast.error(`Failed to delete registration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -141,8 +174,14 @@ const DelegateAffairsDashboard: React.FC = () => {
 
                 {/* Registrations Table */}
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                      <span className="ml-3 text-gray-600">Loading registrations...</span>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -212,18 +251,29 @@ const DelegateAffairsDashboard: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button className="text-green-600 hover:text-green-900 mr-4">
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button className="text-blue-600 hover:text-blue-900">
-                                View Details
-                              </button>
+                              <div className="flex space-x-2">
+                                <button className="text-green-600 hover:text-green-900" title="Edit">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button className="text-blue-600 hover:text-blue-900" title="View Details">
+                                  View Details
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteRegistration(registration.id)}
+                                  className="text-red-600 hover:text-red-900" 
+                                  title="Delete Registration"
+                                  disabled={saving}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -284,7 +334,7 @@ const DelegateAffairsDashboard: React.FC = () => {
                       }
                     } catch (error) {
                       console.error('Error sending email:', error);
-                      toast.error(`Failed to send email: ${error.message}`);
+                      toast.error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
                       throw error;
                     }
                   }}
