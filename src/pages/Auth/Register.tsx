@@ -764,7 +764,7 @@ const Register: React.FC = () => {
                 {/* Accommodation Requirement */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Do you require accommodation? <span className="text-red-600">*</span>
+                    Do you require accommodation? [Further information will be communicated soon] <span className="text-red-600">*</span>
                   </label>
                   <select
                     {...register('requiresAccommodation', { required: 'Please select accommodation requirement' })}
