@@ -346,6 +346,12 @@ export const paymentsAPI = {
     razorpayPaymentId: string;
     razorpaySignature: string;
   }) => {
+    console.log('Verifying payment with data:', {
+      paymentId: data.paymentId,
+      razorpayPaymentId: data.razorpayPaymentId,
+      razorpaySignature: data.razorpaySignature ? '***signature***' : 'missing'
+    });
+    
     return authenticatedFetch('/api/payments/verify', {
       method: 'POST',
       body: JSON.stringify(data),

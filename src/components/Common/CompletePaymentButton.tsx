@@ -147,6 +147,12 @@ const CompletePaymentButton: React.FC<CompletePaymentButtonProps> = ({
           setPaymentStatus('processing');
           
           try {
+            // Check if user is still authenticated
+            const token = localStorage.getItem('munToken');
+            if (!token) {
+              throw new Error('Authentication token not found. Please log in again.');
+            }
+
             // Verify payment
             const verifyResponse = await paymentsAPI.verifyPayment({
               paymentId: payment.id,
@@ -173,7 +179,18 @@ const CompletePaymentButton: React.FC<CompletePaymentButtonProps> = ({
           } catch (error) {
             console.error('Payment verification error:', error);
             setPaymentStatus('failed');
-            toast.error('Payment verification failed. Please contact support.');
+            
+            // Provide more specific error messages
+            if (error.message.includes('Authentication token not found')) {
+              toast.error('Session expired. Please log in again and retry payment.');
+            } else if (error.message.includes('401') || error.message.includes('403')) {
+              toast.error('Authentication failed. Please log in again and retry payment.');
+            } else if (error.message.includes('400')) {
+              toast.error('Payment verification failed. Please contact support with payment details.');
+            } else {
+              toast.error('Payment verification failed. Please contact support.');
+            }
+            
             onPaymentFailure?.(error);
           }
         },

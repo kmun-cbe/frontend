@@ -95,6 +95,12 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         order_id: razorpayOrder.id,
         handler: async function (response: any) {
           try {
+            // Check if user is still authenticated
+            const token = localStorage.getItem('munToken');
+            if (!token) {
+              throw new Error('Authentication token not found. Please log in again.');
+            }
+
             // Verify payment
             const verifyResponse = await paymentsAPI.verifyPayment({
               paymentId: payment.id,
@@ -111,7 +117,18 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
             }
           } catch (error) {
             console.error('Payment verification error:', error);
-            toast.error('Payment verification failed');
+            
+            // Provide more specific error messages
+            if (error.message.includes('Authentication token not found')) {
+              toast.error('Session expired. Please log in again and retry payment.');
+            } else if (error.message.includes('401') || error.message.includes('403')) {
+              toast.error('Authentication failed. Please log in again and retry payment.');
+            } else if (error.message.includes('400')) {
+              toast.error('Payment verification failed. Please contact support with payment details.');
+            } else {
+              toast.error('Payment verification failed');
+            }
+            
             onFailure?.(error);
           }
         },
