@@ -118,7 +118,7 @@ const Committees: React.FC = () => {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2"></h4>
                       <ul className="list-disc list-inside text-gray-600 space-y-1">
-                        <li></li>
+                        
                       </ul>
                     </div>
                   </div>
