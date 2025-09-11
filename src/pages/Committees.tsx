@@ -116,9 +116,9 @@ const Committees: React.FC = () => {
                     </div>
 
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Agenda</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2"></h4>
                       <ul className="list-disc list-inside text-gray-600 space-y-1">
-                        <li>To be Announced</li>
+                        <li></li>
                       </ul>
                     </div>
                   </div>
@@ -126,7 +126,7 @@ const Committees: React.FC = () => {
                   <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div>
-                        <span>Chairs: To be Announced</span>
+                        <span></span>
                       </div>
                     </div>
                   </div>
