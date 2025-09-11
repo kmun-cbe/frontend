@@ -475,6 +475,21 @@ const Register: React.FC = () => {
 
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Instructions Box */}
+            <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-semibold mb-2">Important Instructions:</p>
+                  <ul className="space-y-1">
+                    <li>• Payment must be completed to be considered as valid registration. In case of any issues please take a screenshot and reach out to us for resolution</li>
+                    <li>• Please complete the process in a single time. Do Not click back at any time.</li>
+                    <li>• Please find the portfolio matrix in the link: <a href="https://docs.google.com/spreadsheets/d/1E6CL3CFHawj4iIWghBHXIgmEWYGZTpt6Y--Fn3nJff4/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-medium">Portfolio Matrix</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             {step === 1 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -749,7 +764,7 @@ const Register: React.FC = () => {
                 {/* Accommodation Requirement */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Do you require accommodation? <span className="text-red-600">*</span>
+                    Do you require accommodation? [Further information will be communicated soon] <span className="text-red-600">*</span>
                   </label>
                   <select
                     {...register('requiresAccommodation', { required: 'Please select accommodation requirement' })}
